@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
             ok: false,
             msg: 'No ha datos en el arreglo de productos',
         })
-    } 
+    }
 
     return res.status(200).json({
         ok: true,
@@ -64,13 +64,13 @@ app.post('/', (req, res) => {
                 arrJsnProductos
             }
         })
-    } else {
-        //regresamos el estatus
-        return res.status(400).json({
-            ok: false,
-            msg: 'Se recibieron datos erroneos'
-        })
     }
+    //regresamos el estatus
+    return res.status(400).json({
+        ok: false,
+        msg: 'Se recibieron datos erroneos'
+    })
+
 })
 //Metodo Delete para borrar un dato
 app.delete('/', (req, res) => {
@@ -96,20 +96,21 @@ app.delete('/', (req, res) => {
                     arrJsnProductos
                 }
             })
-        } else {//Si no encontro el usuario
-            //Regresa el estatus
-            return res.status(400).json({
-                ok: false,
-                msg: 'No se encontro el id'
-            })
         }
-    } else {//Si no se mando ID
+        //Si no encontro el usuario
         //Regresa el estatus
         return res.status(400).json({
             ok: false,
-            msg: 'Se recibieron datos erroneos'
+            msg: 'No se encontro el id'
         })
-    }
+
+    } //Si no se mando ID
+    //Regresa el estatus
+    return res.status(400).json({
+        ok: false,
+        msg: 'Se recibieron datos erroneos'
+    })
+
 })
 //Metodo PUT para actualizar un dato 
 app.put('/', (req, res) => {
@@ -159,22 +160,23 @@ app.put('/', (req, res) => {
                     arrJsnProductos
                 }
             })
-        } else {//Si no se encontro ID
-            //Regresamos el estatus
-            return res.status(400).json({
-                ok: false,
-                msg: 'No se encontro el ID'
-            })
         }
-    } else {//Si no se mando ID o no se mando algun campo a actualizar
+        //Si no se encontro ID
         //Regresamos el estatus
         return res.status(400).json({
             ok: false,
-            msg: 'Se recibieron datos erroneos'
+            msg: 'No se encontro el ID'
         })
-    }
-})
 
+    }
+    //Si no se mando ID o no se mando algun campo a actualizar
+    //Regresamos el estatus
+    return res.status(400).json({
+        ok: false,
+        msg: 'Se recibieron datos erroneos'
+    })
+
+})
 
 
 //Para poder usar Express
