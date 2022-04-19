@@ -9,7 +9,7 @@ let arrJsnProductos = [{ _id: 1, strNombre: '', strDescripcion: '', nmbCantidad:
 
 //Metodo GET para leer los datos
 app.get('/', (req, res) => {
-    const arrProductos = arrJsnProductos; //Tomo los usuarios
+    const arrProductos = arrJsnProductos; //Tomo los productos
     //Regresamos el estatus
     if (arrProductos.length == 0) {
         return res.status(400).json({
@@ -97,7 +97,7 @@ app.delete('/', (req, res) => {
                 }
             })
         }
-        //Si no encontro el usuario
+        //Si no encontro el producto
         //Regresa el estatus
         return res.status(400).json({
             ok: false,
@@ -137,19 +137,19 @@ app.put('/', (req, res) => {
                 producto.strNombre = strNombre; //Actualiza el campo de nombre
                 arrJsnProductos.splice(pos, 1, producto); //Reemplaza el objeto en la posiicon "pos" con producto
             }
-            if (strDescripcion) {//Si se mando apellido
+            if (strDescripcion) {//Si se mando descripcion
                 var producto = arrJsnProductos[pos];//Toma el valor del arreglo en la posicion POS
-                producto.strDescripcion = strDescripcion;//Actualiza el campo de apellido
+                producto.strDescripcion = strDescripcion;//Actualiza el campo de descripcion
                 arrJsnProductos.splice(pos, 1, producto);//Reemplaza el objeto en la posiicon "pos" con producto
             }
-            if (nmbCantidad) {//Si se mando email
+            if (nmbCantidad) {//Si se mando cantidad
                 var producto = arrJsnProductos[pos];//Toma el valor del arreglo en la posicion POS
-                producto.nmbCantidad = nmbCantidad;//Actualiza el campo de email
+                producto.nmbCantidad = nmbCantidad;//Actualiza el campo de cantidad
                 arrJsnProductos.splice(pos, 1, producto);//Reemplaza el objeto en la posiicon "pos" con producto
             }
-            if (nmbPrecio) {//Si se mando email
+            if (nmbPrecio) {//Si se mando precio
                 var producto = arrJsnProductos[pos];//Toma el valor del arreglo en la posicion POS
-                producto.nmbPrecio = nmbPrecio;//Actualiza el campo de email
+                producto.nmbPrecio = nmbPrecio;//Actualiza el campo de precio
                 arrJsnProductos.splice(pos, 1, producto);//Reemplaza el objeto en la posiicon "pos" con producto
             }
             //Regresamos el estatus
