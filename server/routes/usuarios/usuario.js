@@ -10,14 +10,21 @@ let arrJsnUsuarios = [{ _id: 1, strNombre: 'Pedro', strApellido: 'Esparza', strE
 app.get('/', (req, res) => {
     const arrUsuarios = arrJsnUsuarios; //Tomo los usuarios
     //Regresamos el estatus
-    return res.status(200).json({
-        ok: true,
-        msg: 'Se recibieron los usuarios de manera exitosa',
-        cont: {
-            arrUsuarios //El cont junto con el JSON muestra los valores dentro del arreglo
-        }
-    })
-}) 
+    if (arrUsuarios.length > 0) {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se regresaron los usuarios de manera exitosa',
+            cont: {
+                arrUsuarios //El cont junto con el JSON muestra los valores dentro del arreglo
+            }
+        })
+    } else {
+        return res.status(400).json({
+            ok: false,
+            msg: 'No ha datos en el arreglo de usuarios',
+        })
+    }
+})
 //Metodo Post para guardar un nuevo dato
 app.post('/', (req, res) => {
     //Tomo los valores del body
@@ -40,7 +47,7 @@ app.post('/', (req, res) => {
             const body = { _id: +req.body._id, strNombre: req.body.strNombre, strApellido: req.body.strApellido, strEmail: req.body.strEmail }
             arrJsnUsuarios.push(body); //Lo insertamos en el arreglo
             //Regresamos el estatus
-            res.status(200).json({
+            return res.status(200).json({
                 ok: true,
                 msg: 'Se recibio el usuario',
                 cont: {
