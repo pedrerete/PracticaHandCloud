@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
             arrUsuarios //El cont junto con el JSON muestra los valores dentro del arreglo
         }
     })
-})
+}) 
 //Metodo Post para guardar un nuevo dato
 app.post('/', (req, res) => {
     //Tomo los valores del body
