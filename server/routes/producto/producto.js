@@ -14,17 +14,15 @@ app.get('/', (req, res) => {
     if (arrProductos.length == 0) {
         return res.status(400).json({
             ok: false,
-            msg: 'No ha datos en el arreglo de productos',
+            msg: 'No hay datos en el arreglo de productos',
         })
     }
-
     return res.status(200).json({
         ok: true,
         msg: 'Se regresaron los productos de manera exitosa',
         cont: {
             arrProductos //El cont junto con el JSON muestra los valores dentro del arreglo
         }
-
     })
 })
 //Metodo Post para guardar un nuevo dato
@@ -42,17 +40,14 @@ app.post('/', (req, res) => {
         for (var index = 0; index < arrJsnProductos.length; ++index) {
             var producto = arrJsnProductos[index];
             if (producto._id == _id) {
-                hasMatch = true;//Si lo ecnuentra, activa la bandera 
-                break;
+                //Regresamos el estatus
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Se recibio un id repetido'
+                })
             }
         }
-        if (hasMatch) { //Si encontro un match ya existre el producto id
-            //Regresamos el estatus
-            return res.status(400).json({
-                ok: false,
-                msg: 'Se recibio un id repetido:'
-            })
-        }
+       
         //Creamos una variable con esos valores para el arreglo
         const body = { _id: +req.body._id, strNombre: req.body.strNombre, strDescripcion: req.body.strDescripcion, nmbCantidad: req.body.nmbCantidad, nmbPrecio: req.body.nmbPrecio }
         arrJsnProductos.push(body); //Lo insertamos en el arreglo
@@ -87,13 +82,14 @@ app.delete('/', (req, res) => {
             }
         }
         if (hasMatch) {//Si fue encontrado
+            const producto = arrJsnProductos[pos]; //extraemos el producto eliminado para mostrarlo
             arrJsnProductos.splice(pos, 1); //Borra un campo en la posicion "pos"
             //Regresa el estatus
-            return res.status(400).json({
-                ok: false,
+            return res.status(200).json({
+                ok: true,
                 msg: 'Se elimino el producto',
                 cont: {
-                    arrJsnProductos
+                    producto
                 }
             })
         }
