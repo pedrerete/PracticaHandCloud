@@ -7,7 +7,7 @@ const app = express.Router();
 //Inizializamos el arreglo de json de productos
 let arrJsnProductos = [{ _id: 1, strNombre: '', strDescripcion: '', nmbCantidad: 0, nmbPrecio: 0 }]
 
-//Metodo GET para leer los datos
+//Metodo GET para leer los datos de producto
 app.get('/', (req, res) => {
     const arrProductos = arrJsnProductos; //Tomo los productos
     //Regresamos el estatus
