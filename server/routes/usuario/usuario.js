@@ -32,8 +32,8 @@ app.get('/obtenerUsuario', (req, res) => {
         //Barremos el arreglo buscando el match del ID
         for (var index = 0; index < arrJsnUsuarios.length; ++index) {
             var usuario = arrJsnUsuarios[index];
-            if (usuario._id == _id) 
-            //Si lo encontro, mandamos el estatus correcto
+            if (usuario._id == _id)
+                //Si lo encontro, mandamos el estatus correcto
                 return res.status(200).json({
                     ok: true,
                     msg: 'Se encontro el usuario',
@@ -41,7 +41,6 @@ app.get('/obtenerUsuario', (req, res) => {
                         usuario
                     }
                 })
-                        
         }
         //si llego aqui es que no lo encontro y mandamos estatus incorrecto
         return res.status(400).json({
@@ -51,17 +50,15 @@ app.get('/obtenerUsuario', (req, res) => {
                 arrJsnUsuarios
             }
         })
-
     }
     //Si llego aqui es que no se mando usuario y manda estatus incorrecto
     return res.status(400).json({
         ok: false,
         msg: 'No se recibio usuario',
         cont: {
-            
-        }
-    })      
 
+        }
+    })
 })
 //Metodo Post para guardar un nuevo dato
 app.post('/', (req, res) => {
@@ -201,6 +198,31 @@ app.put('/', (req, res) => {
             msg: 'Se recibieron datos erroneos'
         })
     }
+})
+
+
+//Mongoose con MongoDB en la ruta
+const usuarioModel = require('../../models/usuario/usuario.model');
+//Metodo GET 
+app.get('/MongoDB', async (req, res) => {
+    const obtenerUsuario = await usuarioModel.find();
+
+    if (Object.keys(obtenerUsuario).length != 0) {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Accedi a la ruta de usuario',
+            cont: {
+                obtenerUsuario
+            }
+        })
+    }
+    return res.status(400).json({
+        ok: false,
+        msg: 'No se encontraron usuarios',
+        cont: {
+            obtenerUsuario
+        }
+    })
 })
 
 //Para poder usar Express

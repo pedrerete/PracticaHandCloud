@@ -174,5 +174,28 @@ app.put('/', (req, res) => {
 
 })
 
+//Mongoose con MongoDB en la ruta
+const productoModel = require('../../models/producto/producto.model');
+//Metodo GET 
+app.get('/MongoDB', async (req, res) => {
+    const obtenerProducto = await productoModel.find();
+    if (Object.keys(obtenerProducto).length != 0) {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Accedi a la ruta de producto',
+            cont: {
+                obtenerProducto
+            }
+        })
+    }
+    return res.status(400).json({
+        ok: false,
+        msg: 'No se encontraron productos',
+        cont: {
+            obtenerProducto
+        }
+    })
+})
+
 //Para poder usar Express
 module.exports = app;
