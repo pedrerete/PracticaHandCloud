@@ -25,6 +25,44 @@ app.get('/', (req, res) => {
         })
     }
 })
+//segundo metodo GET que recibe un idUsuario y regresa el usuario con ese ID
+app.get('/obtenerUsuario', (req, res) => {
+    const _id = req.query.idUsuario;//obtenemos el param de idUsuario enviado
+    if (_id) { //Si id no fue mandando, debe regresar un error
+        //Barremos el arreglo buscando el match del ID
+        for (var index = 0; index < arrJsnUsuarios.length; ++index) {
+            var usuario = arrJsnUsuarios[index];
+            if (usuario._id == _id) 
+            //Si lo encontro, mandamos el estatus correcto
+                return res.status(200).json({
+                    ok: true,
+                    msg: 'Se encontro el usuario',
+                    cont: {
+                        usuario
+                    }
+                })
+                        
+        }
+        //si llego aqui es que no lo encontro y mandamos estatus incorrecto
+        return res.status(400).json({
+            ok: false,
+            msg: 'No se econtro el usuario',
+            cont: {
+                arrJsnUsuarios
+            }
+        })
+
+    }
+    //Si llego aqui es que no se mando usuario y manda estatus incorrecto
+    return res.status(400).json({
+        ok: false,
+        msg: 'No se recibio usuario',
+        cont: {
+            
+        }
+    })      
+
+})
 //Metodo Post para guardar un nuevo dato
 app.post('/', (req, res) => {
     //Tomo los valores del body
