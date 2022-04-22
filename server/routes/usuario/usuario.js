@@ -200,27 +200,69 @@ app.put('/', (req, res) => {
     }
 })
 
-
+/////////////////////////////////
 //Mongoose con MongoDB en la ruta
-const usuarioModel = require('../../models/usuario/usuario.model');
-//Metodo GET 
-app.get('/MongoDB', async (req, res) => {
-    const obtenerUsuario = await usuarioModel.find();
+/////////////////////////////////
 
-    if (Object.keys(obtenerUsuario).length != 0) {
+//para usar el schema de usuario
+const UsuarioModel = require('../../models/usuario/usuario.model');
+//Metodo GET desde MongoDB
+app.get('/MongoDB', async (req, res) => {
+    //obtenemos los usuarios con FIND
+    const obtenerUsuario = await UsuarioModel.find();
+    //si existen usuarios
+    if (obtenerUsuario.length != 0) {
+        //Regresamos los usuarios
         return res.status(200).json({
             ok: true,
-            msg: 'Accedi a la ruta de usuario',
+            msg: 'Se obtuvieron los usuarios correctamente',
             cont: {
                 obtenerUsuario
             }
         })
     }
+    //regresamos estatus de error
     return res.status(400).json({
         ok: false,
         msg: 'No se encontraron usuarios',
         cont: {
             obtenerUsuario
+        }
+    })
+})
+
+app.post('/MongoDB', async (req, res) => {
+    const body = req.body;
+    const usuarioBody = new UsuarioModel(body);
+    const err = usuarioBody.validateSync();
+    if(err){
+        return res.status(400).json({
+            ok: false,
+            msg: 'No se recibio uno o mas campos, favor de validar',
+            cont: {
+                err
+            }
+        })
+    }
+    const obtenerUsuario = await UsuarioModel.find();
+    for (var index = 0; index < obtenerUsuario.length; ++index) {
+        var usuario = obtenerUsuario[index];
+        if (usuario.strEmail == usuarioBody.strEmail) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Se recibio un correo ya existente'
+                
+            })//Si lo ecnuentra, activa la bandera 
+            break;
+        }
+    }
+
+    const usuarioRegistrado = await usuarioBody.save();
+    return res.status(200).json({
+        ok: true,
+        msg: 'El usuario se recibio de manera exitosa',
+        cont: {
+            usuarioRegistrado
         }
     })
 })

@@ -1,6 +1,7 @@
 //Express para el servidor
 const { response } = require('express');
 const express = require('express');
+const ProductoModel = require('../../models/producto/producto.model');
 const app = express.Router();
 
 
@@ -174,12 +175,18 @@ app.put('/', (req, res) => {
 
 })
 
+/////////////////////////////////
 //Mongoose con MongoDB en la ruta
-const productoModel = require('../../models/producto/producto.model');
-//Metodo GET 
+/////////////////////////////////
+
+//para usar el schema de producto
+//Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
-    const obtenerProducto = await productoModel.find();
-    if (Object.keys(obtenerProducto).length != 0) {
+    //obtenemos los usuarios con FIND
+    const obtenerProducto = await ProductoModel.find();
+    //si existen productos
+    if (obtenerProducto.length != 0) {
+        //Regresamos los productos
         return res.status(200).json({
             ok: true,
             msg: 'Accedi a la ruta de producto',
@@ -188,11 +195,36 @@ app.get('/MongoDB', async (req, res) => {
             }
         })
     }
+    //regresamos estatus de error
     return res.status(400).json({
         ok: false,
         msg: 'No se encontraron productos',
         cont: {
             obtenerProducto
+        }
+    })
+})
+
+//Metodo GET desde MongoDB
+app.post('/MongoDB', async (req, res) => {
+    const body = req.body;
+    const productoBody = new ProductoModel(body);
+    const err = productoBody.validateSync();
+    if(err){
+        return res.status(400).json({
+            ok: false,
+            msg: 'No se recibio uno o mas campos, favor de validar',
+            cont: {
+                err
+            }
+        })
+    }
+    const productoRegistrado = await productoBody.save();
+    return res.status(200).json({
+        ok: true,
+        msg: 'El producto se recibio de manera exitosa',
+        cont: {
+            productoRegistrado
         }
     })
 })
