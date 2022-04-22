@@ -211,7 +211,7 @@ const UsuarioModel = require('../../models/usuario/usuario.model');
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
     //obtenemos los usuarios con FIND
-    const obtenerUsuario = await UsuarioModel.find();
+    const obtenerUsuario = await UsuarioModel.find({}, {strContrasena: false} );
     //si existen usuarios
     if (obtenerUsuario.length != 0) {
         //Regresamos los usuarios
@@ -233,7 +233,7 @@ app.get('/MongoDB', async (req, res) => {
     })
 })
 
-app.post('/MongoDBEncrypted', async (req, res) => {
+app.post('/MongoDB', async (req, res) => {
     const body = {...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena,10): "hola" };
     const usuarioBody = new UsuarioModel(body);
     const err = usuarioBody.validateSync();
