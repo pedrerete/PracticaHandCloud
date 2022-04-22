@@ -2,7 +2,7 @@
 const { response } = require('express');
 const express = require('express');
 const app = express.Router();
-
+const bcrypt = require('bcrypt')
 //Inizializamos el arreglo de json de usuarios
 let arrJsnUsuarios = [{ _id: 1, strNombre: 'Pedro', strApellido: 'Esparza', strEmail: 'pesparza@sigma-alimentos.com' }]
 
@@ -77,6 +77,7 @@ app.post('/', (req, res) => {
                 break;
             }
         }
+        /* Comprobando si el usuario existe en la matriz. */
         if (!hasMatch) { //Si no encontro un match
             //Creamos una variable con esos valores para el arreglo
             const body = { _id: +req.body._id, strNombre: req.body.strNombre, strApellido: req.body.strApellido, strEmail: req.body.strEmail }
@@ -105,6 +106,7 @@ app.post('/', (req, res) => {
 })
 //Metodo Delete para borrar un dato
 app.delete('/', (req, res) => {
+    /* Obtener el valor de la propiedad _id del cuerpo de la solicitud. */
     const _id = req.body._id //Tomamos el ID
     hasMatch = false//Inicilizamos variable del match
     if (_id) {//Si mando usuario
@@ -231,8 +233,8 @@ app.get('/MongoDB', async (req, res) => {
     })
 })
 
-app.post('/MongoDB', async (req, res) => {
-    const body = req.body;
+app.post('/MongoDBEncrypted', async (req, res) => {
+    const body = {...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena,10): "hola" };
     const usuarioBody = new UsuarioModel(body);
     const err = usuarioBody.validateSync();
     if(err){
@@ -266,6 +268,8 @@ app.post('/MongoDB', async (req, res) => {
         }
     })
 })
+
+
 
 //Para poder usar Express
 module.exports = app;

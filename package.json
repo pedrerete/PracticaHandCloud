@@ -8,6 +8,7 @@
   "author": "pedro.esparza",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "colors": "^1.4.0",
     "express": "^4.17.3",
     "mongoose": "^6.3.1"
