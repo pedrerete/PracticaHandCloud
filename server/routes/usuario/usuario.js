@@ -253,13 +253,20 @@ app.post('/MongoDB', async (req, res) => {
             return res.status(400).json({
                 ok: false,
                 msg: 'Se recibio un correo ya existente'
-                
             })//Si lo ecnuentra, activa la bandera 
-            break;
+            break;   
+        }
+    if (usuario.strNombreUsuario == usuarioBody.strNombreUsuario) {
+        return res.status(400).json({
+            ok: false,
+            msg: 'Se recibio un nombreUsuario ya existente'
+            
+        })//Si lo ecnuentra, activa la bandera 
         }
     }
-
     const usuarioRegistrado = await usuarioBody.save();
+    /* Una solución alternativa para ocultar la contraseña de la respuesta. */
+    usuarioRegistrado.strContrasena = "No se puede mostrar pero no supe como borrarla antes del return"
     return res.status(200).json({
         ok: true,
         msg: 'El usuario se recibio de manera exitosa',

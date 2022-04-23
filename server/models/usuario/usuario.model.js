@@ -4,9 +4,14 @@ const mongoose = require("mongoose");
 //Creamos el esquema
 let SchemaUsuario = mongoose.Schema({
     //nombre, tipo, si es requerido o no y el mensaje si es requerido y no se manda
+    /* Crear un esquema para la base de datos. */
     strNombre:{
         type: String,
         required: [true,'No se recibio el strNombre, favor de ingresarlo'] 
+    },
+    strNombreUsuario:{
+        type: String,
+        required: [true,'No se recibio el strNombreUsuario, favor de ingresarlo'] 
     },
     //nombre, tipo, si es requerido o no y el mensaje si es requerido y no se manda
     strApellido:{
