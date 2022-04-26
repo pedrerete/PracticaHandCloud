@@ -184,8 +184,9 @@ app.put('/', (req, res) => {
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
     try {
+        const blnEstado = req.query.blnEstado == 'false' ? false: true;
         //obtenemos los productos con FIND que regresa un arreglo de json... un findOne te regresa un json
-        const obtenerProducto = await ProductoModel.find({blnEstado: true});
+        const obtenerProducto = await ProductoModel.find({blnEstado:blnEstado});
         //si existen productos.. si hubieramos usado findOne, podria ser solo con "obtenerproducto ==TRUE"
         if (obtenerProducto.length != 0) {
             //Regresamos los productos
@@ -264,7 +265,7 @@ app.put('/MongoDB', async (req, res) => {
                 }
             })
         }
-        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto })
+        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto, blnEstado : true })
         if (!encontrarProducto) {
             return res.status(400).json({
                 ok: false,
@@ -318,7 +319,7 @@ app.delete('/MongoDB', async (req, res) => {
                 }
             })
         }
-        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto, blnEstado:true })
+        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto})
         if (!encontrarProducto) {
             return res.status(400).json({
                 ok: false,

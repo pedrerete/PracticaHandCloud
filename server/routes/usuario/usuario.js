@@ -217,7 +217,8 @@ const UsuarioModel = require('../../models/usuario/usuario.model');
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
     //obtenemos los usuarios con FIND
-    const obtenerUsuario = await UsuarioModel.find({}, { strContrasena: false });
+    const blnEstado = req.query.blnEstado == 'false' ? false: true;
+    const obtenerUsuario = await UsuarioModel.find({blnEstado:blnEstado});
     //si existen usuarios
     if (obtenerUsuario.length != 0) {
         //Regresamos los usuarios
@@ -288,7 +289,8 @@ app.post('/MongoDB', async (req, res) => {
 app.put('/MongoDB', async (req, res) => {
     try {
         //leemos los datos enviados
-        const _idUsuario = req.query._id;
+
+        const _idUsuario = req.query._idUsuario;
         if (!_idUsuario) {
             return res.status(400).json({
                 ok: false,
@@ -296,7 +298,7 @@ app.put('/MongoDB', async (req, res) => {
 
             })
         }
-        const encontrarUsuario = await UsuarioModel.findOne({ _id: _idUsuario })
+        const encontrarUsuario = await UsuarioModel.findOne({ _id: _idUsuario, blnEstado:true })
         if (!encontrarUsuario) {
             return res.status(400).json({
                 ok: false,
@@ -383,10 +385,20 @@ app.delete('/MongoDB', async (req, res) => {
         if (!_idUsuario || _idUsuario.length != 24) {
             return res.status(400).json({
                 ok: false,
-                msg: _idUsuario ? 'El identificador no es valido' : 'No se recibio id de producto',
+                msg: _idUsuario ? 'El identificador no es valido' : 'No se recibio id de usuario',
                 cont: {
                     blnEstado,
                 _idUsuario
+                }
+            })
+        }
+        const encontrarUsuario = await UsuarioModel.findOne({ _id: _idUsuario})
+        if (!encontrarUsuario) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El usuario no se encuentra registrado',
+                cont: {
+                    _idUsuario
                 }
             })
         }
@@ -396,7 +408,7 @@ app.delete('/MongoDB', async (req, res) => {
                 ok: false,
                 msg: blnEstado == false? 'El usuario no se pudo desactivar': 'El usuario no se pudo activar',
                 cont: {
-                    borrarProducto
+                    borrarUsuario
                 }
             })
         }
@@ -409,35 +421,7 @@ app.delete('/MongoDB', async (req, res) => {
             })
         
         
-       /*  const encontrarUsuario = await UsuarioModel.findOne({ _id: _idUsuario, blnEstado:true })
-        if (!encontrarUsuario) {
-            return res.status(400).json({
-                ok: false,
-                msg: 'El usuario no se encuentra registrado',
-                cont: {
-                    _idUsuario
-                }
-            })
-        }
-        //const borrarProducto = await ProductoModel.findByIdAndDelete(_idUsuario) no se debe borrar
-        const borrarUsuario = await USuarioModel.findByIdAndUpdate(_idUsuario, {blnEstado:false}, {new:true})
-        
-        if (!borrarProducto) {
-            return res.status(400).json({
-                ok: true,
-                msg: 'El producto no se logro desactivar',
-                cont: {
-                    borrarUsuario
-                }
-            })
-        }
-        return res.status(200).json({
-            ok: true,
-            msg: 'Se desactivo el usuario',
-            cont: {
-                borrarUsuario
-            }
-        }) */
+       
     } catch (error) {
         return res.status(500).json({
             ok: false,
