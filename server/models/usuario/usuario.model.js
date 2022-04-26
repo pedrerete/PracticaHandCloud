@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 let SchemaUsuario = mongoose.Schema({
     //nombre, tipo, si es requerido o no y el mensaje si es requerido y no se manda
     /* Crear un esquema para la base de datos. */
+    blnEstado:{
+        type:Boolean,
+        default:true
+    },
     strNombre:{
         type: String,
         required: [true,'No se recibio el strNombre, favor de ingresarlo'] 

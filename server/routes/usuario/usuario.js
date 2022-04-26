@@ -309,17 +309,17 @@ app.put('/MongoDB', async (req, res) => {
         const body = req.body
         const existeUsuario = await UsuarioModel.findOne({ strNombreUsuario: req.body.strNombreUsuario })
 
-        if(body.strNombreUsuario){
-           if(existeUsuario){
-            return res.status(400).json({
-                ok: true,
-                msg: 'El usuario ya existe y no se logro actualizar',
-                cont: {
-                    body
-                }
-            })
-           }else{
-            const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, {$set:{strNombre: req.body.strNombre, strApellido: req.body.strApellido,strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario}}, {new:true})
+        if (body.strNombreUsuario) {
+            if (existeUsuario) {
+                return res.status(400).json({
+                    ok: true,
+                    msg: 'El usuario ya existe y no se logro actualizar',
+                    cont: {
+                        body
+                    }
+                })
+            } else {
+                const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, { $set: { strNombre: req.body.strNombre, strApellido: req.body.strApellido, strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario } }, { new: true })
                 if (!actualizarUsuario) {
                     return res.status(400).json({
                         ok: true,
@@ -333,14 +333,14 @@ app.put('/MongoDB', async (req, res) => {
                     ok: true,
                     msg: 'Se actualizo el usuario',
                     cont: {
-                        usuarioAnterior : encontrarUsuario,
-                        usuarioNuevo : actualizarUsuario
+                        usuarioAnterior: encontrarUsuario,
+                        usuarioNuevo: actualizarUsuario
                     }
                 })
-           }
-        }else{
+            }
+        } else {
 
-            const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, {$set:{strNombre: req.body.strNombre,strApellido: req.body.strApellido,strDireccion: req.body.strDireccion}}, {new:true})
+            const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, { $set: { strNombre: req.body.strNombre, strApellido: req.body.strApellido, strDireccion: req.body.strDireccion } }, { new: true })
             if (!actualizarUsuario) {
                 return res.status(400).json({
                     ok: true,
@@ -354,15 +354,15 @@ app.put('/MongoDB', async (req, res) => {
                 ok: true,
                 msg: 'Se actualizo el usuario',
                 cont: {
-                    usuarioAnterior : encontrarUsuario,
-                    usuarioNuevo : actualizarUsuario
+                    usuarioAnterior: encontrarUsuario,
+                    usuarioNuevo: actualizarUsuario
                 }
             })
         }
-        
-        
 
-        
+
+
+
     } catch (error) {
         return res.status(500).json({
             ok: false,
@@ -374,5 +374,70 @@ app.put('/MongoDB', async (req, res) => {
     }
 })
 
+app.delete('/MongoDB', async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idUsuario = req.query._idUsuario;
+        const blnEstado = req.query.blnEstado == 'false' ? false: true;
+
+        if (!_idUsuario || _idUsuario.length != 24) {
+            return res.status(400).json({
+                ok: false,
+                msg: _idUsuario ? 'El identificador no es valido' : 'No se recibio id de producto',
+                cont: {
+                    blnEstado,
+                _idUsuario
+                }
+            })
+        }
+            return res.status(200).json({
+                ok: true,
+                msg: 'Se recibieron los siguientes valores',
+                cont: {
+                    blnEstado,
+                    _idUsuario
+                }
+            })
+        
+        
+       /*  const encontrarUsuario = await UsuarioModel.findOne({ _id: _idUsuario, blnEstado:true })
+        if (!encontrarUsuario) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El usuario no se encuentra registrado',
+                cont: {
+                    _idUsuario
+                }
+            })
+        }
+        //const borrarProducto = await ProductoModel.findByIdAndDelete(_idUsuario) no se debe borrar
+        const borrarUsuario = await USuarioModel.findByIdAndUpdate(_idUsuario, {blnEstado:false}, {new:true})
+        
+        if (!borrarProducto) {
+            return res.status(400).json({
+                ok: true,
+                msg: 'El producto no se logro desactivar',
+                cont: {
+                    borrarUsuario
+                }
+            })
+        }
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se desactivo el usuario',
+            cont: {
+                borrarUsuario
+            }
+        }) */
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                error
+            }
+        })
+    }
+})
 //Para poder usar Express
 module.exports = app;

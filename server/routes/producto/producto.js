@@ -184,8 +184,8 @@ app.put('/', (req, res) => {
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
     try {
-        //obtenemos los usuarios con FIND que regresa un arreglo de json... un findOne te regresa un json
-        const obtenerProducto = await ProductoModel.find();
+        //obtenemos los productos con FIND que regresa un arreglo de json... un findOne te regresa un json
+        const obtenerProducto = await ProductoModel.find({blnEstado: true});
         //si existen productos.. si hubieramos usado findOne, podria ser solo con "obtenerproducto ==TRUE"
         if (obtenerProducto.length != 0) {
             //Regresamos los productos
@@ -275,7 +275,7 @@ app.put('/MongoDB', async (req, res) => {
             })
         }
         const body = req.body
-        const actualizarProducto = await ProductoModel.findByIdAndUpdate(_idProducto , body, {new:true})
+        const actualizarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, body, { new: true })
         if (!actualizarProducto) {
             return res.status(400).json({
                 ok: true,
@@ -285,13 +285,13 @@ app.put('/MongoDB', async (req, res) => {
                 }
             })
         }
-        
+
         return res.status(200).json({
             ok: true,
-            msg: 'Se actualizo el usuario',
+            msg: 'Se actualizo el producto',
             cont: {
-                productoAnterior : encontrarProducto,
-                productoNuevo : actualizarProducto
+                productoAnterior: encontrarProducto,
+                productoNuevo: actualizarProducto
             }
         })
     } catch (error) {
@@ -305,7 +305,58 @@ app.put('/MongoDB', async (req, res) => {
     }
 })
 
-
+app.delete('/MongoDB', async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idProducto = req.query._idProducto;
+        if (!_idProducto || _idProducto.length != 24) {
+            return res.status(400).json({
+                ok: false,
+                msg: _idProducto ? 'El identificador no es valido' : 'No se recibio id de producto',
+                cont: {
+                    _idProducto
+                }
+            })
+        }
+        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto, blnEstado:true })
+        if (!encontrarProducto) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El producto no se encuentra registrado',
+                cont: {
+                    _idProducto
+                }
+            })
+        }
+        //const borrarProducto = await ProductoModel.findByIdAndDelete(_idProducto) no se debe borrar
+        const borrarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, {blnEstado:false}, {new:true})
+        
+        if (!borrarProducto) {
+            return res.status(400).json({
+                ok: true,
+                msg: 'El producto no se logro desactivar',
+                cont: {
+                    borrarProducto
+                }
+            })
+        }
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se desactivo el producto',
+            cont: {
+                borrarProducto
+            }
+        })
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                error
+            }
+        })
+    }
+})
 
 //Para poder usar Express
 module.exports = app;
