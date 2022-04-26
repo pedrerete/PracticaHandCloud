@@ -333,7 +333,7 @@ app.delete('/MongoDB', async (req, res) => {
         
         if (!borrarProducto) {
             return res.status(400).json({
-                ok: true,
+                ok: false,
                 msg: 'El producto no se logro desactivar',
                 cont: {
                     borrarProducto
