@@ -25,9 +25,9 @@ app.get('/', (req, res) => {
         })
     }
 })
-//segundo metodo GET que recibe un idUsuario y regresa el usuario con ese ID
+//segundo metodo GET que recibe un idUsuario y regresa los atributos del usuario de ese ID
 app.get('/obtenerUsuario', (req, res) => {
-    const _id = req.query.idUsuario;//obtenemos el param de idUsuario enviado
+    const _id = req.body._id;//obtenemos el param de idUsuario enviado
     if (_id) { //Si id no fue mandando, debe regresar un error
         //Barremos el arreglo buscando el match del ID
         for (var index = 0; index < arrJsnUsuarios.length; ++index) {
@@ -36,7 +36,7 @@ app.get('/obtenerUsuario', (req, res) => {
                 //Si lo encontro, mandamos el estatus correcto
                 return res.status(200).json({
                     ok: true,
-                    msg: 'Se encontro el usuario',
+                    msg: 'Se encontro el usuario: ' + _id,
                     cont: {
                         usuario
                     }
@@ -45,7 +45,7 @@ app.get('/obtenerUsuario', (req, res) => {
         //si llego aqui es que no lo encontro y mandamos estatus incorrecto
         return res.status(400).json({
             ok: false,
-            msg: 'No se econtro el usuario',
+            msg: 'No se econtro el usuario: ' + _id,
             cont: {
                 arrJsnUsuarios
             }
@@ -85,7 +85,10 @@ app.post('/', (req, res) => {
             //Regresamos el estatus
             return res.status(200).json({
                 ok: true,
-                msg: 'Se recibio el usuario',
+                msg: 'Se recibio el usuario con id: ' + _id,
+                usr: {
+                    body
+                },
                 cont: {
                     arrJsnUsuarios
                 }
@@ -94,7 +97,7 @@ app.post('/', (req, res) => {
             //Regresamos el estatus
             return res.status(400).json({
                 ok: false,
-                msg: 'Se recibio un id repetido:'
+                msg: 'Se recibio un id repetido: ' + _id
             })
         }
     } else {
@@ -124,7 +127,7 @@ app.delete('/', (req, res) => {
             //Regresa el estatus
             return res.status(400).json({
                 ok: false,
-                msg: 'Se elimino el usuario',
+                msg: 'Se elimino el usuario con id: ' + _id,
                 cont: {
                     arrJsnUsuarios
                 }
@@ -133,7 +136,7 @@ app.delete('/', (req, res) => {
             //Regresa el estatus
             return res.status(400).json({
                 ok: false,
-                msg: 'No se encontro el id'
+                msg: 'No se encontro el id:' + _id
             })
         }
     } else {//Si no se mando ID
@@ -181,7 +184,10 @@ app.put('/', (req, res) => {
             //Regresamos el estatus
             return res.status(200).json({
                 ok: true,
-                msg: 'Se actualizo el usuario',
+                msg: 'Se actualizo el usuario con id ' + _id,
+                usr: {
+                    usuario
+                },
                 cont: {
                     arrJsnUsuarios
                 }
@@ -190,7 +196,7 @@ app.put('/', (req, res) => {
             //Regresamos el estatus
             return res.status(400).json({
                 ok: false,
-                msg: 'No se encontro el ID'
+                msg: 'No se encontro el ID ' + _id
             })
         }
     } else {//Si no se mando ID o no se mando algun campo a actualizar
@@ -211,7 +217,7 @@ const UsuarioModel = require('../../models/usuario/usuario.model');
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
     //obtenemos los usuarios con FIND
-    const obtenerUsuario = await UsuarioModel.find({}, {strContrasena: false} );
+    const obtenerUsuario = await UsuarioModel.find({}, { strContrasena: false });
     //si existen usuarios
     if (obtenerUsuario.length != 0) {
         //Regresamos los usuarios
@@ -234,10 +240,13 @@ app.get('/MongoDB', async (req, res) => {
 })
 
 app.post('/MongoDB', async (req, res) => {
-    const body = {...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena,10): "hola" };
+    /* Una forma de crear un nuevo objeto con las mismas propiedades que el objeto req.body, pero con
+    la contraseña cifrada. */
+    //instruccion ternaria: condicion? verdadero : falso
+    const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
     const usuarioBody = new UsuarioModel(body);
     const err = usuarioBody.validateSync();
-    if(err){
+    if (err) {
         return res.status(400).json({
             ok: false,
             msg: 'No se recibio uno o mas campos, favor de validar',
@@ -252,16 +261,16 @@ app.post('/MongoDB', async (req, res) => {
         if (usuario.strEmail == usuarioBody.strEmail) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Se recibio un correo ya existente'
-            })//Si lo ecnuentra, activa la bandera 
-            break;   
+                msg: 'Se recibio un correo ya existente: ' + usuario.strEmail
+            })
+            break;
         }
-    if (usuario.strNombreUsuario == usuarioBody.strNombreUsuario) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'Se recibio un nombreUsuario ya existente'
-            
-        })//Si lo ecnuentra, activa la bandera 
+        if (usuario.strNombreUsuario == usuarioBody.strNombreUsuario) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Se recibio un nombreUsuario ya existente: ' + usuario.strNombreUsuario
+            })
+            break;
         }
     }
     const usuarioRegistrado = await usuarioBody.save();
@@ -276,7 +285,94 @@ app.post('/MongoDB', async (req, res) => {
     })
 })
 
+app.put('/MongoDB', async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idUsuario = req.query._id;
+        if (!_idUsuario) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'No se recibio el id',
 
+            })
+        }
+        const encontrarUsuario = await UsuarioModel.findOne({ _id: _idUsuario })
+        if (!encontrarUsuario) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El usuario no se encuentra registrado',
+                cont: {
+                    _idUsuario
+                }
+            })
+        }
+        const body = req.body
+        const existeUsuario = await UsuarioModel.findOne({ strNombreUsuario: req.body.strNombreUsuario })
+
+        if(body.strNombreUsuario){
+           if(existeUsuario){
+            return res.status(400).json({
+                ok: true,
+                msg: 'El usuario ya existe y no se logro actualizar',
+                cont: {
+                    body
+                }
+            })
+           }else{
+            const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, {$set:{strNombre: req.body.strNombre, strApellido: req.body.strApellido,strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario}}, {new:true})
+                if (!actualizarUsuario) {
+                    return res.status(400).json({
+                        ok: true,
+                        msg: 'El usuario no se logro actualizar',
+                        cont: {
+                            body
+                        }
+                    })
+                }
+                return res.status(200).json({
+                    ok: true,
+                    msg: 'Se actualizo el usuario',
+                    cont: {
+                        usuarioAnterior : encontrarUsuario,
+                        usuarioNuevo : actualizarUsuario
+                    }
+                })
+           }
+        }else{
+
+            const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, {$set:{strNombre: req.body.strNombre,strApellido: req.body.strApellido,strDireccion: req.body.strDireccion}}, {new:true})
+            if (!actualizarUsuario) {
+                return res.status(400).json({
+                    ok: true,
+                    msg: 'El usuario no se logro actualizar',
+                    cont: {
+                        body
+                    }
+                })
+            }
+            return res.status(200).json({
+                ok: true,
+                msg: 'Se actualizo el usuario',
+                cont: {
+                    usuarioAnterior : encontrarUsuario,
+                    usuarioNuevo : actualizarUsuario
+                }
+            })
+        }
+        
+        
+
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                error
+            }
+        })
+    }
+})
 
 //Para poder usar Express
 module.exports = app;

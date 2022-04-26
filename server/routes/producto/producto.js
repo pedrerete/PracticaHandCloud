@@ -1,6 +1,7 @@
 //Express para el servidor
 const { response } = require('express');
 const express = require('express');
+const req = require('express/lib/request');
 const ProductoModel = require('../../models/producto/producto.model');
 const app = express.Router();
 
@@ -48,7 +49,7 @@ app.post('/', (req, res) => {
                 })
             }
         }
-       
+
         //Creamos una variable con esos valores para el arreglo
         const body = { _id: +req.body._id, strNombre: req.body.strNombre, strDescripcion: req.body.strDescripcion, nmbCantidad: req.body.nmbCantidad, nmbPrecio: req.body.nmbPrecio }
         arrJsnProductos.push(body); //Lo insertamos en el arreglo
@@ -182,52 +183,129 @@ app.put('/', (req, res) => {
 //para usar el schema de producto
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
-    //obtenemos los usuarios con FIND
-    const obtenerProducto = await ProductoModel.find();
-    //si existen productos
-    if (obtenerProducto.length != 0) {
-        //Regresamos los productos
-        return res.status(200).json({
-            ok: true,
-            msg: 'Accedi a la ruta de producto',
+    try {
+        //obtenemos los usuarios con FIND que regresa un arreglo de json... un findOne te regresa un json
+        const obtenerProducto = await ProductoModel.find();
+        //si existen productos.. si hubieramos usado findOne, podria ser solo con "obtenerproducto ==TRUE"
+        if (obtenerProducto.length != 0) {
+            //Regresamos los productos
+            return res.status(200).json({
+                ok: true,
+                msg: 'Accedi a la ruta de producto',
+                cont: {
+                    obtenerProducto
+                }
+            })
+        }
+        //regresamos estatus de error
+        return res.status(400).json({
+            ok: false,
+            msg: 'No se encontraron productos',
             cont: {
                 obtenerProducto
             }
         })
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                error
+            }
+        })
     }
-    //regresamos estatus de error
-    return res.status(400).json({
-        ok: false,
-        msg: 'No se encontraron productos',
-        cont: {
-            obtenerProducto
-        }
-    })
 })
 
 //Metodo GET desde MongoDB
 app.post('/MongoDB', async (req, res) => {
-    const body = req.body;
-    const productoBody = new ProductoModel(body);
-    const err = productoBody.validateSync();
-    if(err){
-        return res.status(400).json({
-            ok: false,
-            msg: 'No se recibio uno o mas campos, favor de validar',
+    try {
+        const body = req.body;
+        const productoBody = new ProductoModel(body);
+        const err = productoBody.validateSync();
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'No se recibio uno o mas campos, favor de validar',
+                cont: {
+                    err
+                }
+            })
+        }
+        const productoRegistrado = await productoBody.save();
+        return res.status(200).json({
+            ok: true,
+            msg: 'El producto se recibio de manera exitosa',
             cont: {
-                err
+                productoRegistrado
+            }
+        })
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                error
             }
         })
     }
-    const productoRegistrado = await productoBody.save();
-    return res.status(200).json({
-        ok: true,
-        msg: 'El producto se recibio de manera exitosa',
-        cont: {
-            productoRegistrado
-        }
-    })
+
 })
+
+app.put('/MongoDB', async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idProducto = req.query._idProducto;
+        if (!_idProducto || _idProducto.length != 24) {
+            return res.status(400).json({
+                ok: false,
+                msg: _idProducto ? 'El identificador no es valido' : 'No se recibio id de producto',
+                cont: {
+                    _idProducto
+                }
+            })
+        }
+        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto })
+        if (!encontrarProducto) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El producto no se encuentra registrado',
+                cont: {
+                    _idProducto
+                }
+            })
+        }
+        const body = req.body
+        const actualizarProducto = await ProductoModel.findByIdAndUpdate(_idProducto , body, {new:true})
+        if (!actualizarProducto) {
+            return res.status(400).json({
+                ok: true,
+                msg: 'El producto no se logro actualizar',
+                cont: {
+                    body
+                }
+            })
+        }
+        
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se actualizo el usuario',
+            cont: {
+                productoAnterior : encontrarProducto,
+                productoNuevo : actualizarProducto
+            }
+        })
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                error
+            }
+        })
+    }
+})
+
+
 
 //Para poder usar Express
 module.exports = app;

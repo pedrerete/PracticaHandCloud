@@ -4,7 +4,6 @@ const app = express.Router();
 
 /* Importando las rutas desde los archivos en las carpetas. */
 app.use('/usuario',require('./usuario/usuario'))
-app.use('/usuario2',require('./usuario/usuario2'))
 app.use('/producto',require('./producto/producto'))
 
 
