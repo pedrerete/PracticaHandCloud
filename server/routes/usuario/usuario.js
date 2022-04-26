@@ -390,12 +390,21 @@ app.delete('/MongoDB', async (req, res) => {
                 }
             })
         }
+        const borrarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, {blnEstado:blnEstado}, {new:true})
+        if (!borrarUsuario) {
+            return res.status(400).json({
+                ok: false,
+                msg: blnEstado == false? 'El usuario no se pudo desactivar': 'El usuario no se pudo activar',
+                cont: {
+                    borrarProducto
+                }
+            })
+        }
             return res.status(200).json({
                 ok: true,
-                msg: 'Se recibieron los siguientes valores',
+                msg: blnEstado == false? 'Se desactivo el usuario': 'Se activo el usuario',
                 cont: {
-                    blnEstado,
-                    _idUsuario
+                    borrarUsuario
                 }
             })
         
