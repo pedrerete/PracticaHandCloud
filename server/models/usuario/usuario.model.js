@@ -40,7 +40,7 @@ let SchemaUsuario = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         required: [true,'No se recibio el idEmpresa, favor de ingresarlo'] 
     }
-
+ 
 })
 //exporetamos el eschema con el nombre de usuario
 module.exports = mongoose.model('usuario',SchemaUsuario);
