@@ -1,4 +1,5 @@
 //Para usar mongoose
+/* Importación del módulo mongoose. */
 const mongoose = require("mongoose");
 
 //Creamos el esquema

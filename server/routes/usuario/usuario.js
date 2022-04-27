@@ -257,6 +257,8 @@ app.post('/MongoDB', async (req, res) => {
         })
     }
     const obtenerUsuario = await UsuarioModel.find();
+    /* Un ciclo for que recorrerá la matriz de usuarios e imprimirá el nombre de cada usuario. */
+    /* Comprobando si el correo electrónico y el nombre de usuario ya existen en la base de datos. */
     for (var index = 0; index < obtenerUsuario.length; ++index) {
         var usuario = obtenerUsuario[index];
         if (usuario.strEmail == usuarioBody.strEmail) {
