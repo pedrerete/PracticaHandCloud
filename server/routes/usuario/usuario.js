@@ -219,6 +219,17 @@ app.get('/MongoDB', async (req, res) => {
     //obtenemos los usuarios con FIND
     const blnEstado = req.query.blnEstado == 'false' ? false: true;
     const obtenerUsuario = await UsuarioModel.find({blnEstado:blnEstado});
+    const obtenerUsuarioEmpresa = await UsuarioModel.aggregate(
+        [{
+            $lookup:
+            {
+                from: "empresas",
+                localField: "idEmpresa",
+                foreignField: "_id",
+                as: "InfoEmpresa"
+            }
+        }]
+    )
     //si existen usuarios
     if (obtenerUsuario.length != 0) {
         //Regresamos los usuarios
@@ -226,7 +237,8 @@ app.get('/MongoDB', async (req, res) => {
             ok: true,
             msg: 'Se obtuvieron los usuarios correctamente',
             cont: {
-                obtenerUsuario
+                obtenerUsuario,
+                obtenerUsuarioEmpresa
             }
         })
     }
