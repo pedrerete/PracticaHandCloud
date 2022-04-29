@@ -1,4 +1,5 @@
 //Para usar mongoose
+/* Importación del módulo mongoose. */
 const mongoose = require("mongoose");
 
 //Creamos el esquema
@@ -30,10 +31,16 @@ let SchemaUsuario = mongoose.Schema({
     strEmail:{
         type: String,
         required: [true,'No se recibio el strEmail, favor de ingresarlo'] 
-    },strContrasena:{
+    },
+    strContrasena:{
         type: String,
         required: [true,'No se recibio el strContraseña, favor de ingresarlo'] 
     },
+    idEmpresa:{
+        type: mongoose.Types.ObjectId,
+        required: [true,'No se recibio el idEmpresa, favor de ingresarlo'] 
+    }
+ 
 })
 //exporetamos el eschema con el nombre de usuario
 module.exports = mongoose.model('usuario',SchemaUsuario);

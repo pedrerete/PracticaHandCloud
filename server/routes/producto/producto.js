@@ -184,9 +184,25 @@ app.put('/', (req, res) => {
 //Metodo GET desde MongoDB
 app.get('/MongoDB', async (req, res) => {
     try {
-        const blnEstado = req.query.blnEstado == 'false' ? false: true;
+        const blnEstado = req.query.blnEstado == 'false' ? false : true;
+
         //obtenemos los productos con FIND que regresa un arreglo de json... un findOne te regresa un json
-        const obtenerProducto = await ProductoModel.find({blnEstado:blnEstado});
+        const obtenerProducto = await ProductoModel.find({ blnEstado: blnEstado });
+
+        //funcion con agregate
+        const blnEstado2 = !blnEstado //para traernos diferentes cosas
+        const obetenerProductosAgregate = await ProductoModel.aggregate([
+            {
+                $project: { strNombre: 1, strPrecio: 1, blnEstado:1 }
+            },
+            {
+                $match:{ blnEstado:blnEstado2}
+                //$match: { $expr: { $ne: ["$blnEstado",blnEstado] } } //no tentendi como funciona este
+            }
+           
+        ]);
+        //funcion con agregate
+
         //si existen productos.. si hubieramos usado findOne, podria ser solo con "obtenerproducto ==TRUE"
         if (obtenerProducto.length != 0) {
             //Regresamos los productos
@@ -194,7 +210,8 @@ app.get('/MongoDB', async (req, res) => {
                 ok: true,
                 msg: 'Accedi a la ruta de producto',
                 cont: {
-                    obtenerProducto
+                    obtenerProducto,
+                    obetenerProductosAgregate//con aggregate
                 }
             })
         }
@@ -265,7 +282,7 @@ app.put('/MongoDB', async (req, res) => {
                 }
             })
         }
-        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto, blnEstado : true })
+        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto, blnEstado: true })
         if (!encontrarProducto) {
             return res.status(400).json({
                 ok: false,
@@ -319,7 +336,7 @@ app.delete('/MongoDB', async (req, res) => {
                 }
             })
         }
-        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto})
+        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto })
         if (!encontrarProducto) {
             return res.status(400).json({
                 ok: false,
@@ -330,8 +347,8 @@ app.delete('/MongoDB', async (req, res) => {
             })
         }
         //const borrarProducto = await ProductoModel.findByIdAndDelete(_idProducto) no se debe borrar
-        const borrarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, {blnEstado:false}, {new:true})
-        
+        const borrarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, { blnEstado: false }, { new: true })
+
         if (!borrarProducto) {
             return res.status(400).json({
                 ok: false,
