@@ -2,7 +2,7 @@
 const mongoose = require("mongoose");
 
 //Creamos el esquema
-let SchemaProducto = mongoose.Schema({
+let Schemaempresa = mongoose.Schema({
     //nombre, tipo, si es requerido o no y el mensaje si es requerido y no se manda
     blnEstado:{
         type:Boolean,
@@ -32,4 +32,4 @@ let SchemaProducto = mongoose.Schema({
     }
 })
 //exporetamos el eschema con el nombre de producto
-module.exports = mongoose.model('empresa',SchemaProducto);
+module.exports = mongoose.model('empresa',Schemaempresa);

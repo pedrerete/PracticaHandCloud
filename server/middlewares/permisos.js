@@ -19,12 +19,10 @@ const verificarAcceso = async (req, res, next) => {
                 return res.status(400).json({
                     ok: false,
                     msg: err.name == 'JsonWebTokenError'? 'Error, token invalido, se nego el acceso a ' + url + ' con el metodo ' + req.method : 'Token expirado, se nego el acceso a ' + url + ' con el metodo ' + req.method
-                    
                 })
             }
             console.log('Se autorizo acceso a ' + url + ' con el metodo ' + req.method)
             next();
-
         })
     } catch (error) {
         return res.status(500).json({

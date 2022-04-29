@@ -134,7 +134,7 @@ app.put('/MongoDB',verificarAcceso, async (req, res) => {
                     }
                 })
             } else {
-                const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, { $set: { strNombre: req.body.strNombre, strApellido: req.body.strApellido, strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario } }, { new: true })
+                const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, { $set: { strNombre: req.body.strNombre, strApellido: req.body.strApellido, strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario, idEmpresa : req.body.idEmpresa } }, { new: true })
                 if (!actualizarUsuario) {
                     return res.status(400).json({
                         ok: true,

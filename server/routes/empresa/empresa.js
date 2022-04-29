@@ -4,6 +4,7 @@ const express = require('express');
 const req = require('express/lib/request');
 const EmpresaModel = require('../../models/empresa/empresa.model');
 const app = express.Router();
+const { verificarAcceso } = require('../../middlewares/permisos')
 
 
 /////////////////////////////////
@@ -12,7 +13,7 @@ const app = express.Router();
 
 //para usar el schema de Empresa
 //Metodo GET desde MongoDB
-app.get('/MongoDB', async (req, res) => {
+app.get('/MongoDB',verificarAcceso, async (req, res) => {
     try {
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
@@ -65,7 +66,7 @@ app.get('/MongoDB', async (req, res) => {
 })
 
 //Metodo GET desde MongoDB
-app.post('/MongoDB', async (req, res) => {
+app.post('/MongoDB',verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
         const EmpresaBody = new EmpresaModel(body);
@@ -99,7 +100,7 @@ app.post('/MongoDB', async (req, res) => {
 
 })
 
-app.put('/MongoDB', async (req, res) => {
+app.put('/MongoDB',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;
@@ -153,7 +154,7 @@ app.put('/MongoDB', async (req, res) => {
     }
 })
 
-app.delete('/MongoDB', async (req, res) => {
+app.delete('/MongoDB',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;
