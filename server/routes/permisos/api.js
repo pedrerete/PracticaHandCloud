@@ -11,8 +11,48 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 //para usar el schema de usuario
 const ApiModel = require('../../models/permisos/api.model');
 //Metodo GET desde MongoDB
+app.get('/MongoDB', verificarAcceso, async (req, res) => {
+    //obtenemos los usuarios con FIND
+    const obtenerApi = await ApiModel.find();
+
+    /* Haciendo una búsqueda de la colección UsuarioModel a la colección Empresas. */
+    const obtenerApiRol = await ApiModel.aggregate(
+        [{
+            $lookup:
+            {
+                from: "rols",
+                localField: "_id",
+                foreignField: "arrObjIdApis",
+                as: "InfoExtra"
+            }
+        }]
+    )
+    //si existen usuarios
+    if (obtenerApi.length != 0) {
+        //Regresamos los usuarios
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se obtuvieron las apis correctamente',
+            cont: {
+                obtenerApi,
+                obtenerApiRol
+                        }
+        })
+    }
+    //regresamos estatus de error
+    return res.status(400).json({
+        ok: false,
+        msg: 'No se encontraron apis',
+        cont: {
+            obtenerApi,
+            obtenerApiRol
+        }
+    })
+})
+
 
 app.post('/MongoDB',verificarAcceso, async (req, res) => {
+    console.log("entro")
     const body = req.body;
     const bodyApi =  new ApiModel(body);
     const err = bodyApi.validateSync();
@@ -45,3 +85,4 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
         }
     })
 })
+module.exports = app;
