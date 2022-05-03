@@ -80,6 +80,16 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
                 }
             })
         }
+        if (req.files) {
+            if (!req.files.strImagen) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'No se recibio archivo de imagen'
+                })
+            }
+            productoBody.strImagen = await subirArchivo(req.files.strImagen, 'productos', ['image/pgn', 'image/jpg', 'image/jpeg'])
+        }
+
         const productoRegistrado = await productoBody.save();
         return res.status(200).json({
             ok: true,

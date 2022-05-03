@@ -9,7 +9,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 /* Creación de una instancia de la aplicación express. */
 const app = express();
-
+const fileUpload = require('express-fileupload')
+app.use(fileUpload())
 /* Un middleware que analiza el cuerpo de la solicitud. */
 app.use(express.urlencoded({ extended: true }))
 

@@ -26,7 +26,10 @@ let SchemaProducto = mongoose.Schema({
     nmbPrecio:{
         type: Number,
         required: [true,'No se recibio el nmbPrecio, favor de ingresarlo'] 
-    }
+    },
+    strImagen:{
+        type: String
+        }
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('producto',SchemaProducto);

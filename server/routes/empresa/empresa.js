@@ -80,6 +80,17 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
                 }
             })
         }
+        if (req.files) {
+            if (!req.files.strImagen) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'No se recibio archivo de imagen'
+                })
+            }
+            EmpresaBody.strImagen = await subirArchivo(req.files.strImagen, 'empresas', ['image/pgn', 'image/jpg', 'image/jpeg'])
+        }
+
+
         const EmpresaRegistrado = await EmpresaBody.save();
         return res.status(200).json({
             ok: true,

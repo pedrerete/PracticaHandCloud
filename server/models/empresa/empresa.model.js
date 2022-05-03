@@ -29,7 +29,10 @@ let Schemaempresa = mongoose.Schema({
     nmbCodigoPostal:{
         type: Number,
         required: [true,'No se recibio el nmbCodigoPostal, favor de ingresarlo'] 
-    }
+    },
+    strImagen:{
+        type: String
+        }
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('empresa',Schemaempresa);

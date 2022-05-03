@@ -39,8 +39,11 @@ let SchemaUsuario = mongoose.Schema({
     idEmpresa:{
         type: mongoose.Types.ObjectId,
         required: [true,'No se recibio el idEmpresa, favor de ingresarlo'] 
-    }
- 
+    },
+    strImagen:{
+        type: String,
+        default: 'default.jpg'
+        }
 })
 //exporetamos el eschema con el nombre de usuario
 module.exports = mongoose.model('usuario',SchemaUsuario);

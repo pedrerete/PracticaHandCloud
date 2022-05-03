@@ -8,36 +8,52 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 //Mongoose con MongoDB en la ruta
 /////////////////////////////////
 
-//para usar el schema de usuario
+//para usar el schema de Rol
 const RolModel = require('../../models/permisos/rol.model');
 //Metodo GET desde MongoDB
 
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
-    //obtenemos los usuarios con FIND
-    const obtenerRol = await RolModel.find();
+    const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
-    /* Haciendo una búsqueda de la colección UsuarioModel a la colección Empresas. */
-    const obtenerApiRol = await RolModel.aggregate(
-        [{
-            $lookup:
+    /* Haciendo una búsqueda de la colección Rol a la colección Apis. */
+    /* const obtenerApiRol = await RolModel.aggregate(
+        [
+            {
+                $match: { blnEstado: blnEstado}
+
+            },
+            { $lookup:
             {
                 from: "apis",
                 localField: "arrObjIdApis",
                 foreignField: "_id",
                 as: "InfoExtra"
             }
-        }]
-    )
-    //si existen usuarios
-    if (obtenerRol.length != 0) {
-        //Regresamos los usuarios
+        }
+        ]
+    ) */
+        /* Haciendo una búsqueda de la colección Rol a la colección Apis. */
+    const obtApiRol2 = await RolModel.aggregate([
+        {
+            $lookup:{
+                from: 'apis',
+                let: {arrObjIdApis: '$arrObjIdApis'},
+                pipeline:[
+                   {$match: {$expr:{$in:['$_id','$$arrObjIdApis']}}}
+                ],
+                as: 'apis'
+            }
+        }
+    ])
+    //si existen roles
+    if (obtenerApiRol.length != 0) {
+        //Regresamos los roles
         return res.status(200).json({
             ok: true,
             msg: 'Se obtuvieron los roles correctamente',
             cont: {
-                obtenerRol,
-                obtenerApiRol
-                        }
+                obtApiRol2
+            }
         })
     }
     //regresamos estatus de error
@@ -45,40 +61,39 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
         ok: false,
         msg: 'No se encontraron roles',
         cont: {
-            obtenerUsuario,
-            obtenerApiRol
+            obtApiRol2
         }
     })
 })
 
 
 
-app.post('/MongoDB',verificarAcceso, async (req, res) => {
+app.post('/MongoDB', verificarAcceso, async (req, res) => {
     const body = req.body;
-    const bodyRol =  new RolModel(body);
+    const bodyRol = new RolModel(body);
     const err = bodyRol.validateSync();
-    if (err){
+    if (err) {
         return res.status(400).json({
-            ok:false,
+            ok: false,
             msg: 'uno o mas campos no se registraron, favor de ingresarlos',
             cont: {
                 err
             }
         })
     }
-    if(!body.arrObjIdApis){
+    if (!body.arrObjIdApis) {
         return res.status(400).json({
-            ok:false,
+            ok: false,
             msg: 'uno o mas campos no se registraron, favor de ingresarlos',
             cont: {
                 arrObjIdApis: null
             }
         })
     }
-    const enncontroRol = await RolModel.findOne({strNombre: bodyRol.strNombre},{strNombre:1})
-    if(enncontroRol){
+    const enncontroRol = await RolModel.findOne({ strNombre: bodyRol.strNombre }, { strNombre: 1 })
+    if (enncontroRol) {
         return res.status(400).json({
-            ok:false,
+            ok: false,
             msg: 'El rol ya se encuentra registrado',
             cont: {
                 enncontroRol
@@ -87,7 +102,7 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
     }
     const registroRol = await bodyRol.save();
     return res.status(200).json({
-        ok:true,
+        ok: true,
         msg: 'El rol se registro de manera exitosa',
         cont: {
             registroRol

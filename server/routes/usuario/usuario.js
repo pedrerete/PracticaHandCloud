@@ -4,7 +4,7 @@ const express = require('express');
 const app = express.Router();
 const bcrypt = require('bcrypt')
 const { verificarAcceso } = require('../../middlewares/permisos')
-
+const { subirArchivo } = require('../../library/cargararchivos')
 /////////////////////////////////
 //Mongoose con MongoDB en la ruta
 /////////////////////////////////
@@ -51,9 +51,8 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
     })
 })
 
-app.post('/MongoDB',verificarAcceso, async (req, res) => {
-    /* Una forma de crear un nuevo objeto con las mismas propiedades que el objeto req.body, pero con
-    la contraseña cifrada. */
+app.post('/MongoDB', verificarAcceso, async (req, res) => {
+
     //instruccion ternaria: condicion? verdadero : falso
     const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
     const usuarioBody = new UsuarioModel(body);
@@ -87,6 +86,18 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
             break;
         }
     }
+    if (req.files) {
+        if (!req.files.strImagen) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'No se recibio archivo de imagen'
+            })
+        }
+        usuarioBody.strImagen = await subirArchivo(req.files.strImagen, 'usuarios', ['image/pgn', 'image/jpg', 'image/jpeg'])
+    }
+
+
+
     const usuarioRegistrado = await usuarioBody.save();
     /* Una solución alternativa para ocultar la contraseña de la respuesta. */
     usuarioRegistrado.strContrasena = "No se puede mostrar pero no supe como borrarla antes del return"
@@ -99,7 +110,7 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
     })
 })
 
-app.put('/MongoDB',verificarAcceso, async (req, res) => {
+app.put('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
 
@@ -134,7 +145,7 @@ app.put('/MongoDB',verificarAcceso, async (req, res) => {
                     }
                 })
             } else {
-                const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, { $set: { strNombre: req.body.strNombre, strApellido: req.body.strApellido, strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario, idEmpresa : req.body.idEmpresa } }, { new: true })
+                const actualizarUsuario = await UsuarioModel.findByIdAndUpdate(_idUsuario, { $set: { strNombre: req.body.strNombre, strApellido: req.body.strApellido, strDireccion: req.body.strDireccion, strNombreUsuario: req.body.strNombreUsuario, idEmpresa: req.body.idEmpresa } }, { new: true })
                 if (!actualizarUsuario) {
                     return res.status(400).json({
                         ok: true,
@@ -186,7 +197,7 @@ app.put('/MongoDB',verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/MongoDB',verificarAcceso, async (req, res) => {
+app.delete('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idUsuario = req.query._idUsuario;
