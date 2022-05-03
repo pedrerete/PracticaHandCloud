@@ -13,7 +13,8 @@ const { subirArchivo } = require('../../library/cargararchivos')
 const UsuarioModel = require('../../models/usuario/usuario.model');
 //Metodo GET desde MongoDB
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
-    //obtenemos los usuarios con FIND
+    try {
+        //obtenemos los usuarios con FIND
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
     const obtenerUsuario = await UsuarioModel.find({ blnEstado: blnEstado });
 
@@ -49,9 +50,21 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
             obtenerUsuario
         }
     })
+    } catch (error) {
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }
 })
 
 app.post('/MongoDB', verificarAcceso, async (req, res) => {
+try {
+    
 
     //instruccion ternaria: condicion? verdadero : falso
     const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
@@ -108,7 +121,20 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
             usuarioRegistrado
         }
     })
+} catch (error) {
+    const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }   
+       
+
 })
+
 
 app.put('/MongoDB', verificarAcceso, async (req, res) => {
     try {
@@ -186,12 +212,12 @@ app.put('/MongoDB', verificarAcceso, async (req, res) => {
             })
         }
 
-    } catch (error) {
+    } catch (error) {const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont: {
-                error
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
@@ -243,12 +269,12 @@ app.delete('/MongoDB', verificarAcceso, async (req, res) => {
 
 
 
-    } catch (error) {
+    } catch (error) {const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont: {
-                error
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }

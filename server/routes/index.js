@@ -9,6 +9,7 @@ app.use('/empresa',require('./empresa/empresa'))
 app.use('/auth',require('./auth/login'))
 app.use('/permisosrol',require('./permisos/rol'))
 app.use('/permisosapi',require('./permisos/api'))
+app.use('/imagen',require('./imagen/imagen'))
 
 
 

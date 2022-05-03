@@ -13,7 +13,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 
 //para usar el schema de producto
 //Metodo GET desde MongoDB
-app.get('/MongoDB',verificarAcceso, async (req, res) => {
+app.get('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
@@ -24,13 +24,13 @@ app.get('/MongoDB',verificarAcceso, async (req, res) => {
         const blnEstado2 = !blnEstado //para traernos diferentes cosas
         const obetenerProductosAgregate = await ProductoModel.aggregate([
             {
-                $project: { strNombre: 1, strPrecio: 1, blnEstado:1 }
+                $project: { strNombre: 1, strPrecio: 1, blnEstado: 1 }
             },
             {
-                $match:{ blnEstado:blnEstado2}
+                $match: { blnEstado: blnEstado2 }
                 //$match: { $expr: { $ne: ["$blnEstado",blnEstado] } } //no tentendi como funciona este
             }
-           
+
         ]);
         //funcion con agregate
 
@@ -55,18 +55,19 @@ app.get('/MongoDB',verificarAcceso, async (req, res) => {
             }
         })
     } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
             cont: {
-                error
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
 })
 
 //Metodo GET desde MongoDB
-app.post('/MongoDB',verificarAcceso, async (req, res) => {
+app.post('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
         const productoBody = new ProductoModel(body);
@@ -99,18 +100,19 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
             }
         })
     } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
             cont: {
-                error
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
 
 })
 
-app.put('/MongoDB',verificarAcceso, async (req, res) => {
+app.put('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idProducto = req.query._idProducto;
@@ -154,17 +156,18 @@ app.put('/MongoDB',verificarAcceso, async (req, res) => {
             }
         })
     } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
             cont: {
-                error
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
 })
 
-app.delete('/MongoDB',verificarAcceso, async (req, res) => {
+app.delete('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idProducto = req.query._idProducto;
@@ -207,11 +210,12 @@ app.delete('/MongoDB',verificarAcceso, async (req, res) => {
             }
         })
     } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
             cont: {
-                error
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }

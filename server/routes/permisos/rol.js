@@ -13,6 +13,8 @@ const RolModel = require('../../models/permisos/rol.model');
 //Metodo GET desde MongoDB
 
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
+    try {
+        
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
     /* Haciendo una búsqueda de la colección Rol a la colección Apis. */
@@ -64,12 +66,23 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
             obtApiRol2
         }
     })
+    } catch (error) {
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }
 })
 
 
 
 app.post('/MongoDB', verificarAcceso, async (req, res) => {
-    const body = req.body;
+    try {
+        const body = req.body;
     const bodyRol = new RolModel(body);
     const err = bodyRol.validateSync();
     if (err) {
@@ -108,5 +121,15 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
             registroRol
         }
     })
+    } catch (error) {
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    } 
 })
 module.exports = app;

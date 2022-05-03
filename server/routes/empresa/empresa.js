@@ -54,12 +54,12 @@ app.get('/MongoDB',verificarAcceso, async (req, res) => {
                 obtenerEmpresa
             }
         })
-    } catch (error) {
+    } catch (error) {const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont: {
-                error
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
@@ -99,12 +99,12 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
                 EmpresaRegistrado
             }
         })
-    } catch (error) {
+    } catch (error) {const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont: {
-                error
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
@@ -154,12 +154,12 @@ app.put('/MongoDB',verificarAcceso, async (req, res) => {
                 EmpresaNuevo: actualizarEmpresa
             }
         })
-    } catch (error) {
+    } catch (error) {const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont: {
-                error
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
@@ -207,12 +207,12 @@ app.delete('/MongoDB',verificarAcceso, async (req, res) => {
                 borrarEmpresa
             }
         })
-    } catch (error) {
+    } catch (error) {const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont: {
-                error
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }

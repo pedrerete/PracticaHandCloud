@@ -12,7 +12,8 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 const ApiModel = require('../../models/permisos/api.model');
 //Metodo GET desde MongoDB
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
-    //obtenemos las apis con FIND
+   try {
+        //obtenemos las apis con FIND
     const obtenerApi = await ApiModel.find();
     //si existen apis
     if (obtenerApi.length != 0) {
@@ -33,11 +34,21 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
             obtenerApi
         }
     })
+   } catch (error) {
+    const err = Error(error)
+    return res.status(500).json({
+        ok: false,
+        msg: 'Error en el servidor',
+        cont:{
+            err: err.message ? err.message : err.name ? err.name : err
+        }
+    })
+   }
 })
 
 
 app.post('/MongoDB', verificarAcceso, async (req, res) => {
-    console.log("entro")
+try {
     const body = req.body;
     const bodyApi = new ApiModel(body);
     const err = bodyApi.validateSync();
@@ -69,5 +80,15 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
             registroApi
         }
     })
+} catch (error) {
+    const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+}    
 })
 module.exports = app;

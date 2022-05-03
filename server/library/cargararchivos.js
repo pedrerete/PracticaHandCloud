@@ -4,6 +4,7 @@ const app = express()
 const uniqid = require('uniqid')
 const fs = require('fs')
 const path = require('path')
+const res = require('express/lib/response')
 app.use(fileUpload)
 
 const subirArchivo = async (file, route, exts) =>{
@@ -12,7 +13,6 @@ const subirArchivo = async (file, route, exts) =>{
             throw new Error('No se mando archivo valido')
         }
         if(!exts.includes(file.mimetype)){
-           
             throw new Error('Solo las extensiones: ' + exts.join(', ') + ' son aceptadas')
         }
         let nameImg = uniqid()  +  path.extname(file.name)
@@ -23,7 +23,15 @@ const subirArchivo = async (file, route, exts) =>{
         })
         return(nameImg)
     }catch  (error){
-        return error
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont:{
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    
     }   
 }
 module.exports = {subirArchivo}
