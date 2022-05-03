@@ -11,6 +11,7 @@ const { subirArchivo } = require('../../library/cargararchivos')
 
 //para usar el schema de usuario
 const UsuarioModel = require('../../models/usuario/usuario.model');
+const rolModel = require('../../models/permisos/rol.model');
 //Metodo GET desde MongoDB
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
     try {
@@ -64,7 +65,6 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
 
 app.post('/MongoDB', verificarAcceso, async (req, res) => {
 try {
-    
 
     //instruccion ternaria: condicion? verdadero : falso
     const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
@@ -78,6 +78,10 @@ try {
                 err
             }
         })
+    }
+    if(!req.body._idObjRol){
+        const encontroRolDefault = await rolModel.findOne({blnRolDefault:true})
+        usuarioBody.idObjRol = encontroRolDefault._id
     }
     const obtenerUsuario = await UsuarioModel.find();
     /* Un ciclo for que recorrerá la matriz de usuarios e imprimirá el nombre de cada usuario. */

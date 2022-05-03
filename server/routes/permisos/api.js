@@ -62,7 +62,7 @@ try {
         })
     }
 
-    const enncontroApi = await ApiModel.findOne({ strRuta: bodyApi.strRuta }, { strRuta: 1 })
+    const enncontroApi = await ApiModel.findOne({ strRuta: bodyApi.strRuta, strMetodo: bodyApi.strMetodo }, { strRuta: 1 })
     if (enncontroApi) {
         return res.status(400).json({
             ok: false,

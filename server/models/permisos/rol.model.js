@@ -17,7 +17,11 @@ let SchemaRol = mongoose.Schema({
         type: String,
         required: [true,'No se recibio el strDescripcion, favor de ingresarlo'] 
     },
-    arrObjIdApis: [mongoose.Types.ObjectId]
+    arrObjIdApis: [mongoose.Types.ObjectId],
+    blnRolDefault:{
+        type:Boolean,
+        default:false
+    }
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('rol',SchemaRol);

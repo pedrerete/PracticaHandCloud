@@ -48,7 +48,7 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
         }
     ])
     //si existen roles
-    if (obtenerApiRol.length != 0) {
+    if (obtApiRol2.length != 0) {
         //Regresamos los roles
         return res.status(200).json({
             ok: true,
