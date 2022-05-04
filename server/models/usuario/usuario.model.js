@@ -44,7 +44,7 @@ let SchemaUsuario = mongoose.Schema({
         type: String,
         default: 'default.jpg'
         },
-    idObjRol:{
+    _idObjRol:{
             type: mongoose.Types.ObjectId,
             required: [false,'No se recibio el idObjRol, favor de ingresarlo'] 
     }

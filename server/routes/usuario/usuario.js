@@ -12,51 +12,76 @@ const { subirArchivo } = require('../../library/cargararchivos')
 //para usar el schema de usuario
 const UsuarioModel = require('../../models/usuario/usuario.model');
 const rolModel = require('../../models/permisos/rol.model');
+const apiModel = require('../../models/permisos/api.model');
+
 //Metodo GET desde MongoDB
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         //obtenemos los usuarios con FIND
-    const blnEstado = req.query.blnEstado == 'false' ? false : true;
-    const obtenerUsuario = await UsuarioModel.find({ blnEstado: blnEstado });
+        const blnEstado = req.query.blnEstado == 'false' ? false : true;
+        const obtenerUsuario = await UsuarioModel.find({ blnEstado: blnEstado });
 
-    /* Haciendo una búsqueda de la colección UsuarioModel a la colección Empresas. */
-    const obtenerUsuarioEmpresa = await UsuarioModel.aggregate(
-        [{
-            $lookup:
+        /* Haciendo una búsqueda de la colección UsuarioModel a la colección Empresas. */
+        const obtenerUsuarioEmpresa = await UsuarioModel.aggregate(
+            [{
+                $lookup:
+                {
+                    from: "empresas",
+                    localField: "idEmpresa",
+                    foreignField: "_id",
+                    as: "InfoEmpresa"
+                },
+            },
             {
-                from: "empresas",
-                localField: "idEmpresa",
-                foreignField: "_id",
-                as: "InfoEmpresa"
+                $lookup: {
+                    from: 'rols',
+                    let: { rolUsuario: '$_idObjRol' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$_id', '$$rolUsuario'] } } },
+                        {
+                            $lookup: {
+                                from: 'apis',
+                                let: { arrObjIdApis: '$arrObjIdApis' },
+                                pipeline: [
+                                    { $match: { $expr: { $in: ['$_id', '$$arrObjIdApis'] } } }
+                                ],
+                                as: 'apis'
+                            }
+                        }
+                    ],
+                    as: 'InfoRol'
+                }
+
+
             }
-        }]
-    )
-    //si existen usuarios
-    if (obtenerUsuario.length != 0) {
-        //Regresamos los usuarios
-        return res.status(200).json({
-            ok: true,
-            msg: 'Se obtuvieron los usuarios correctamente',
+            ]
+        )
+
+        //si existen usuarios
+        if (obtenerUsuarioEmpresa.length != 0) {
+            //Regresamos los usuarios
+            return res.status(200).json({
+                ok: true,
+                msg: 'Se obtuvieron los usuarios correctamente',
+                cont: {
+                    obtenerUsuarioEmpresa
+                }
+            })
+        }
+        //regresamos estatus de error
+        return res.status(400).json({
+            ok: false,
+            msg: 'No se encontraron usuarios',
             cont: {
-                obtenerUsuario,
                 obtenerUsuarioEmpresa
             }
         })
-    }
-    //regresamos estatus de error
-    return res.status(400).json({
-        ok: false,
-        msg: 'No se encontraron usuarios',
-        cont: {
-            obtenerUsuario
-        }
-    })
     } catch (error) {
         const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
@@ -64,78 +89,77 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
 })
 
 app.post('/MongoDB', verificarAcceso, async (req, res) => {
-try {
+    try {
 
-    //instruccion ternaria: condicion? verdadero : falso
-    const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
-    const usuarioBody = new UsuarioModel(body);
-    const err = usuarioBody.validateSync();
-    if (err) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'No se recibio uno o mas campos, favor de validar',
+        //instruccion ternaria: condicion? verdadero : falso
+        const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
+        const usuarioBody = new UsuarioModel(body);
+        const err = usuarioBody.validateSync();
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'No se recibio uno o mas campos, favor de validar',
+                cont: {
+                    err
+                }
+            })
+        }
+        if (!req.body._idObjRol) {
+            const encontroRolDefault = await rolModel.findOne({ blnRolDefault: true })
+            usuarioBody._idObjRol = encontroRolDefault._id
+        }
+        const obtenerUsuario = await UsuarioModel.find();
+        /* Un ciclo for que recorrerá la matriz de usuarios e imprimirá el nombre de cada usuario. */
+        /* Comprobando si el correo electrónico y el nombre de usuario ya existen en la base de datos. */
+        for (var index = 0; index < obtenerUsuario.length; ++index) {
+            var usuario = obtenerUsuario[index];
+            if (usuario.strEmail == usuarioBody.strEmail) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Se recibio un correo ya existente: ' + usuario.strEmail
+                })
+                break;
+            }
+            if (usuario.strNombreUsuario == usuarioBody.strNombreUsuario) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Se recibio un nombreUsuario ya existente: ' + usuario.strNombreUsuario
+                })
+                break;
+            }
+        }
+        if (req.files) {
+            if (!req.files.strImagen) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'No se recibio archivo de imagen'
+                })
+            }
+            usuarioBody.strImagen = await subirArchivo(req.files.strImagen, 'usuarios', ['image/pgn', 'image/jpg', 'image/jpeg'])
+        }
+
+
+        const usuarioRegistrado = await usuarioBody.save();
+        /* Una solución alternativa para ocultar la contraseña de la respuesta. */
+        usuarioRegistrado.strContrasena = "No se puede mostrar pero no supe como borrarla antes del return"
+        return res.status(200).json({
+            ok: true,
+            msg: 'El usuario se recibio de manera exitosa',
             cont: {
-                err
+                usuarioRegistrado
             }
         })
-    }
-    if(!req.body._idObjRol){
-        const encontroRolDefault = await rolModel.findOne({blnRolDefault:true})
-        usuarioBody.idObjRol = encontroRolDefault._id
-    }
-    const obtenerUsuario = await UsuarioModel.find();
-    /* Un ciclo for que recorrerá la matriz de usuarios e imprimirá el nombre de cada usuario. */
-    /* Comprobando si el correo electrónico y el nombre de usuario ya existen en la base de datos. */
-    for (var index = 0; index < obtenerUsuario.length; ++index) {
-        var usuario = obtenerUsuario[index];
-        if (usuario.strEmail == usuarioBody.strEmail) {
-            return res.status(400).json({
-                ok: false,
-                msg: 'Se recibio un correo ya existente: ' + usuario.strEmail
-            })
-            break;
-        }
-        if (usuario.strNombreUsuario == usuarioBody.strNombreUsuario) {
-            return res.status(400).json({
-                ok: false,
-                msg: 'Se recibio un nombreUsuario ya existente: ' + usuario.strNombreUsuario
-            })
-            break;
-        }
-    }
-    if (req.files) {
-        if (!req.files.strImagen) {
-            return res.status(400).json({
-                ok: false,
-                msg: 'No se recibio archivo de imagen'
-            })
-        }
-        usuarioBody.strImagen = await subirArchivo(req.files.strImagen, 'usuarios', ['image/pgn', 'image/jpg', 'image/jpeg'])
-    }
-
-
-
-    const usuarioRegistrado = await usuarioBody.save();
-    /* Una solución alternativa para ocultar la contraseña de la respuesta. */
-    usuarioRegistrado.strContrasena = "No se puede mostrar pero no supe como borrarla antes del return"
-    return res.status(200).json({
-        ok: true,
-        msg: 'El usuario se recibio de manera exitosa',
-        cont: {
-            usuarioRegistrado
-        }
-    })
-} catch (error) {
-    const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
-    }   
-       
+    }
+
 
 })
 
@@ -216,11 +240,12 @@ app.put('/MongoDB', verificarAcceso, async (req, res) => {
             })
         }
 
-    } catch (error) {const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
@@ -273,11 +298,12 @@ app.delete('/MongoDB', verificarAcceso, async (req, res) => {
 
 
 
-    } catch (error) {const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
