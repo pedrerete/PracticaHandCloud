@@ -11,19 +11,20 @@ const { subirArchivo } = require('../../library/cargararchivos')
 
 //para usar el schema de usuario
 const UsuarioModel = require('../../models/usuario/usuario.model');
-const rolModel = require('../../models/permisos/rol.model');
-const apiModel = require('../../models/permisos/api.model');
+const RolModel = require('../../models/permisos/rol.model');
 
 //Metodo GET desde MongoDB
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
     try {
         //obtenemos los usuarios con FIND
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
-        const obtenerUsuario = await UsuarioModel.find({ blnEstado: blnEstado });
 
         /* Haciendo una búsqueda de la colección UsuarioModel a la colección Empresas. */
-        const obtenerUsuarioEmpresa = await UsuarioModel.aggregate(
+        const obtenerUsuario = await UsuarioModel.aggregate(
             [{
+                $match:{blnEstado:blnEstado}
+            },
+                {
                 $lookup:
                 {
                     from: "empresas",
@@ -51,20 +52,18 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
                     ],
                     as: 'InfoRol'
                 }
-
-
             }
             ]
         )
 
         //si existen usuarios
-        if (obtenerUsuarioEmpresa.length != 0) {
+        if (obtenerUsuario.length != 0) {
             //Regresamos los usuarios
             return res.status(200).json({
                 ok: true,
                 msg: 'Se obtuvieron los usuarios correctamente',
                 cont: {
-                    obtenerUsuarioEmpresa
+                    obtenerUsuario
                 }
             })
         }
@@ -73,7 +72,7 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
             ok: false,
             msg: 'No se encontraron usuarios',
             cont: {
-                obtenerUsuarioEmpresa
+                obtenerUsuario
             }
         })
     } catch (error) {
@@ -88,7 +87,7 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
     }
 })
 
-app.post('/MongoDB', verificarAcceso, async (req, res) => {
+app.post('/MongoDB', async (req, res) => {
     try {
 
         //instruccion ternaria: condicion? verdadero : falso
@@ -105,7 +104,7 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
             })
         }
         if (!req.body._idObjRol) {
-            const encontroRolDefault = await rolModel.findOne({ blnRolDefault: true })
+            const encontroRolDefault = await RolModel.findOne({ blnRolDefault: true })
             usuarioBody._idObjRol = encontroRolDefault._id
         }
         const obtenerUsuario = await UsuarioModel.find();

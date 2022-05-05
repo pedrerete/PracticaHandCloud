@@ -1,19 +1,22 @@
-/* Importación de los módulos necesarios para que se ejecute la aplicación. */
-/* Importando el archivo de configuración. */
 require('./config/config');
-/* Un módulo que te permite usar colores en la consola. */
 require('colors');
-/* Importación del módulo express. */
-const express = require("express");
-/* Importación del módulo mongoose. */
-const mongoose = require("mongoose");
-/* Creación de una instancia de la aplicación express. */
+const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
-const fileUpload = require('express-fileupload')
-app.use(fileUpload())
-/* Un middleware que analiza el cuerpo de la solicitud. */
-app.use(express.urlencoded({ extended: true }))
+const cors = require('cors');
+const fileUpload = require('express-fileupload');
 
+app.use(fileUpload());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
+app.use(cors());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+    next();
+});
 /* Diciéndole al servidor que use las rutas en el archivo index.js en la carpeta de rutas. */
 app.use('/api', require('./routes/index'))
 
