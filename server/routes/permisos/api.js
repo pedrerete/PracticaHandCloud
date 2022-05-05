@@ -11,7 +11,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 //para usar el schema de api
 const ApiModel = require('../../models/permisos/api.model');
 //Metodo GET desde MongoDB
-app.get('/MongoDB', verificarAcceso, async (req, res) => {
+app.get('/', verificarAcceso, async (req, res) => {
    try {
         //obtenemos las apis con FIND
     const obtenerApi = await ApiModel.find();
@@ -47,7 +47,7 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
 })
 
 
-app.post('/MongoDB', verificarAcceso, async (req, res) => {
+app.post('/', verificarAcceso, async (req, res) => {
 try {
     const body = req.body;
     const bodyApi = new ApiModel(body);

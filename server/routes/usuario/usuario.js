@@ -14,7 +14,7 @@ const UsuarioModel = require('../../models/usuario/usuario.model');
 const RolModel = require('../../models/permisos/rol.model');
 
 //Metodo GET desde MongoDB
-app.get('/MongoDB', verificarAcceso, async (req, res) => {
+app.get('/', verificarAcceso, async (req, res) => {
     try {
         //obtenemos los usuarios con FIND
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
@@ -87,7 +87,7 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
     }
 })
 
-app.post('/MongoDB', async (req, res) => {
+app.post('/', async (req, res) => {
     try {
 
         //instruccion ternaria: condicion? verdadero : falso
@@ -163,7 +163,7 @@ app.post('/MongoDB', async (req, res) => {
 })
 
 
-app.put('/MongoDB', verificarAcceso, async (req, res) => {
+app.put('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
 
@@ -251,7 +251,7 @@ app.put('/MongoDB', verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/MongoDB', verificarAcceso, async (req, res) => {
+app.delete('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idUsuario = req.query._idUsuario;

@@ -13,7 +13,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 
 //para usar el schema de Empresa
 //Metodo GET desde MongoDB
-app.get('/MongoDB',verificarAcceso, async (req, res) => {
+app.get('/',verificarAcceso, async (req, res) => {
     try {
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
@@ -66,7 +66,7 @@ app.get('/MongoDB',verificarAcceso, async (req, res) => {
 })
 
 //Metodo GET desde MongoDB
-app.post('/MongoDB',verificarAcceso, async (req, res) => {
+app.post('/',verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
         const EmpresaBody = new EmpresaModel(body);
@@ -111,7 +111,7 @@ app.post('/MongoDB',verificarAcceso, async (req, res) => {
 
 })
 
-app.put('/MongoDB',verificarAcceso, async (req, res) => {
+app.put('/',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;
@@ -165,7 +165,7 @@ app.put('/MongoDB',verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/MongoDB',verificarAcceso, async (req, res) => {
+app.delete('/',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;

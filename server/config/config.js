@@ -1,9 +1,9 @@
 process.env.PORT = process.env.PORT || 3000
 let urlDB;
 if(process.env.NODE_ENV === 'dev'){
-    urlDB = "mongodb://localhost:27017/InventarioEsparza"
+    urlDB = "mongodb+srv://Pedro1622:uoZZc4LqnOIECmwB@cluster0.rhaba.mongodb.net/PedroEsparzaDB?retryWrites=true&w=majority"
 }else {
-    urlDB = "mongodb://localhost:27017/InventarioEsparza"
+    urlDB = "mongodb+srv://Pedro1622:uoZZc4LqnOIECmwB@cluster0.rhaba.mongodb.net/PedroEsparzaDB?retryWrites=true&w=majority"
 }
 
 process.env.URLDB = urlDB;
