@@ -107,7 +107,7 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
     if (enncontroRol) {
         return res.status(400).json({
             ok: false,
-            msg: 'El rol ya se encuentra registradow',
+            msg: 'El rol ya se encuentra registrado',
             cont: {
                 enncontroRol
             }
