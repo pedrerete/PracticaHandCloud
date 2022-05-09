@@ -11,7 +11,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 //para usar el schema de api
 const ApiModel = require('../../models/permisos/api.model');
 //Metodo GET desde MongoDB
-app.get('/', verificarAcceso, async (req, res) => {
+app.get('/',  async (req, res) => {
    try {
         //obtenemos las apis con FIND
     const obtenerApi = await ApiModel.find();
@@ -94,6 +94,60 @@ try {
 
 //delete de API ya quedo 
 //put de API 
+app.put('/', async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idApi = req.query._idApi;
+        if (!_idApi || _idApi.length != 24) {
+            return res.status(400).json({
+                ok: false,
+                msg: _idApi ? 'El identificador no es valido' : 'No se recibio id del api',
+                cont: {
+                    _idApi
+                }
+            })
+        }
+        const encontrarApi = await ApiModel.findOne({ _id: _idApi, blnEstado: true })
+        if (!encontrarApi) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El api no se encuentra registrado',
+                cont: {
+                    encontrarApi
+                }
+            })
+        }
+        const body = req.body
+        const actualizarApi = await ApiModel.findByIdAndUpdate(_idApi, body, { new: true })
+        if (!actualizarApi) {
+            return res.status(400).json({
+                ok: true,
+                msg: 'El api no se logro actualizar',
+                cont: {
+                    body
+                }
+            })
+        }
+
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se actualizo el api',
+            cont: {
+                ApiAnterior: encontrarApi,
+                ApiNuevo: actualizarApi
+            }
+        })
+    } catch (error) {
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }
+})
 
 
 app.delete('/',verificarAcceso, async(req,res) =>{
