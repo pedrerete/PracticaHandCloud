@@ -49,7 +49,7 @@ app.put('/', verificarAcceso, async (req, res) => {
         if (!encontrarImagen) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El rol no se encuentra registrado',
+                msg: 'La imagen no se encuentra registrada',
                 cont: {
                     _idImagen
                 }

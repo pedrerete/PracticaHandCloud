@@ -13,7 +13,7 @@ const RolModel = require('../../models/permisos/rol.model');
 const rolModel = require('../../models/permisos/rol.model');
 //Metodo GET desde MongoDB
 
-app.get('/MongoDB', verificarAcceso, async (req, res) => {
+app.get('/',verificarAcceso, async (req, res) => {
     try {
         
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
@@ -78,10 +78,7 @@ app.get('/MongoDB', verificarAcceso, async (req, res) => {
         })
     }
 })
-
-
-
-app.post('/MongoDB', verificarAcceso, async (req, res) => {
+app.post('/', verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
     const bodyRol = new RolModel(body);
@@ -134,7 +131,7 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
     } 
 })
 
-app.put('/', verificarAcceso, async (req, res) => {
+app.put('/',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idRol = req.query._idRol;
