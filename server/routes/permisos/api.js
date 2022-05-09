@@ -11,7 +11,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 //para usar el schema de api
 const ApiModel = require('../../models/permisos/api.model');
 //Metodo GET desde MongoDB
-app.get('/',  async (req, res) => {
+app.get('/',verificarAcceso,  async (req, res) => {
    try {
         //obtenemos las apis con FIND
     const obtenerApi = await ApiModel.find();
@@ -94,7 +94,7 @@ try {
 
 //delete de API ya quedo 
 //put de API 
-app.put('/', async (req, res) => {
+app.put('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idApi = req.query._idApi;
@@ -206,7 +206,5 @@ app.delete('/',verificarAcceso, async(req,res) =>{
             }
         })
     }
-    
-
 })
 module.exports = app;

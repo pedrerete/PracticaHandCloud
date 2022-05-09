@@ -6,7 +6,7 @@ const app = express.Router();
 const { verificarAcceso } = require('../../middlewares/permisos')
 const imagenModel = require('../../models/imagen/imagen.model');
 
-app.get('/:ruta/:nameImg', async (req, res) => {
+app.get('/:ruta/:nameImg',verificarAcceso, async (req, res) => {
     try {
         const ruta = req.params.ruta
         const nameImg = req.params.nameImg;

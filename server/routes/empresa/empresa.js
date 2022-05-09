@@ -13,7 +13,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 
 //para usar el schema de Empresa
 //Metodo GET desde MongoDB
-app.get('/producto', async (req,res)=>{
+app.get('/producto',verificarAcceso, async (req,res)=>{
 
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
     
@@ -55,7 +55,7 @@ app.get('/producto', async (req,res)=>{
    })
 })
 
-app.get('/usuario', async (req,res)=>{
+app.get('/usuario',verificarAcceso, async (req,res)=>{
 
      const blnEstado = req.query.blnEstado == 'false' ? false : true;
      
