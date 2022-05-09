@@ -10,6 +10,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 
 //para usar el schema de Rol
 const RolModel = require('../../models/permisos/rol.model');
+const rolModel = require('../../models/permisos/rol.model');
 //Metodo GET desde MongoDB
 
 app.get('/MongoDB', verificarAcceso, async (req, res) => {
@@ -131,5 +132,60 @@ app.post('/MongoDB', verificarAcceso, async (req, res) => {
             }
         })
     } 
+})
+
+app.put('/', verificarAcceso, async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idRol = req.query._idRol;
+        if (!_idRol || _idRol.length != 24) {
+            return res.status(400).json({
+                ok: false,
+                msg: _idRol ? 'El identificador no es valido' : 'No se recibio id de rol',
+                cont: {
+                    _idRol
+                }
+            })
+        }
+        const encontrarRol = await RolModel.findOne({ _id: _idRol, blnEstado: true })
+        if (!encontrarRol) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El rol no se encuentra registrado',
+                cont: {
+                    _idRol
+                }
+            })
+        }
+        const body = req.body
+        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body, { new: true })
+        if (!actualizarRol) {
+            return res.status(400).json({
+                ok: true,
+                msg: 'El rol no se logro actualizar',
+                cont: {
+                    body
+                }
+            })
+        }
+
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se actualizo el rol',
+            cont: {
+                rolAnterior: encontrarRol,
+                rolNuevo: actualizarRol
+            }
+        })
+    } catch (error) {
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }
 })
 module.exports = app;
