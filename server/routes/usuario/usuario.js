@@ -136,8 +136,6 @@ app.post('/', async (req, res) => {
             }
             usuarioBody.strImagen = await subirArchivo(req.files.strImagen, 'usuarios', ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
-
-
         const usuarioRegistrado = await usuarioBody.save();
         /* Una solución alternativa para ocultar la contraseña de la respuesta. */
         usuarioRegistrado.strContrasena = "No se puede mostrar pero no supe como borrarla antes del return"

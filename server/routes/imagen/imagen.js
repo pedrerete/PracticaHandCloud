@@ -5,6 +5,7 @@ const app = express.Router();
 
 const { verificarAcceso } = require('../../middlewares/permisos')
 const imagenModel = require('../../models/imagen/imagen.model');
+
 app.get('/:ruta/:nameImg', async (req, res) => {
     try {
         const ruta = req.params.ruta
@@ -14,7 +15,6 @@ app.get('/:ruta/:nameImg', async (req, res) => {
         if(fs.existsSync(rutaImagen)){
             return res.sendFile(rutaImagen)
         }else{
-
             return res.sendFile(noimage)
         }
     } catch (error) {
@@ -27,9 +27,6 @@ app.get('/:ruta/:nameImg', async (req, res) => {
             }
         })
     }   
-    
-   
-    
 })
 
 app.put('/', verificarAcceso, async (req, res) => {

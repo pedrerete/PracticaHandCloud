@@ -15,26 +15,6 @@ const rolModel = require('../../models/permisos/rol.model');
 
 app.get('/',verificarAcceso, async (req, res) => {
     try {
-        
-    const blnEstado = req.query.blnEstado == 'false' ? false : true;
-
-    /* Haciendo una búsqueda de la colección Rol a la colección Apis. */
-    /* const obtenerApiRol = await RolModel.aggregate(
-        [
-            {
-                $match: { blnEstado: blnEstado}
-
-            },
-            { $lookup:
-            {
-                from: "apis",
-                localField: "arrObjIdApis",
-                foreignField: "_id",
-                as: "InfoExtra"
-            }
-        }
-        ]
-    ) */
         /* Haciendo una búsqueda de la colección Rol a la colección Apis. */
     const obtApiRol2 = await RolModel.aggregate([
         {
@@ -185,4 +165,5 @@ app.put('/',verificarAcceso, async (req, res) => {
         })
     }
 })
+//delete de ROL ya quedo
 module.exports = app;

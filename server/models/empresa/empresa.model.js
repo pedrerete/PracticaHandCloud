@@ -31,8 +31,9 @@ let Schemaempresa = mongoose.Schema({
         required: [true,'No se recibio el nmbCodigoPostal, favor de ingresarlo'] 
     },
     strImagen:{
-        type: String
-        }
+        type: String,
+        default: 'default.jpg'
+    }
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('empresa',Schemaempresa);
