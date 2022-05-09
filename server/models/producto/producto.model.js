@@ -28,7 +28,8 @@ let SchemaProducto = mongoose.Schema({
         required: [true,'No se recibio el nmbPrecio, favor de ingresarlo'] 
     },
     strImagen:{
-        type: String
+        type: String,
+        default: 'default.jpg'
         }
 })
 //exporetamos el eschema con el nombre de producto
