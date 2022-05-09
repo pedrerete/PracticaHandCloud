@@ -13,12 +13,95 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 
 //para usar el schema de Empresa
 //Metodo GET desde MongoDB
+app.get('/producto', async (req,res)=>{
+
+    const blnEstado = req.query.blnEstado == 'false' ? false : true;
+    
+    const obtenerEmpresa = await EmpresaModel.aggregate(
+       [{
+           $match:{blnEstado:blnEstado}
+       },
+           {
+           $lookup:
+           {
+            from: 'productos',
+            let: { idEmpresa: '$_id' },
+            pipeline: [
+                { $match: { $expr: { $eq: ['$idEmpresa', '$$idEmpresa'] } } }
+            ],
+            as: 'Productos de la empresa'
+           }
+       }
+       
+       ]
+   )
+   if (obtenerEmpresa.length != 0) {
+       //Regresamos los usuarios
+       return res.status(200).json({
+           ok: true,
+           msg: 'Se obtuvieron las empresas correctamente',
+           cont: {
+               obtenerEmpresa
+           }
+       })
+   }
+   //regresamos estatus de error
+   return res.status(400).json({
+       ok: false,
+       msg: 'No se encontraron empresas',
+       cont: {
+           obtenerEmpresa
+       }
+   })
+})
+
+app.get('/usuario', async (req,res)=>{
+
+     const blnEstado = req.query.blnEstado == 'false' ? false : true;
+     
+     const obtenerEmpresa = await EmpresaModel.aggregate(
+        [{
+            $match:{blnEstado:blnEstado}
+        },
+            {
+            $lookup:
+            {
+                from: "usuarios",
+                localField: "_id",
+                foreignField: "idEmpresa",
+                as: "Usuarios de la empresa:"
+            }
+        }
+        
+        ]
+    )
+    if (obtenerEmpresa.length != 0) {
+        //Regresamos los usuarios
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se obtuvieron las empresas correctamente',
+            cont: {
+                obtenerEmpresa
+            }
+        })
+    }
+    //regresamos estatus de error
+    return res.status(400).json({
+        ok: false,
+        msg: 'No se encontraron empresas',
+        cont: {
+            obtenerEmpresa
+        }
+    })
+})
+
 app.get('/',verificarAcceso, async (req, res) => {
     try {
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
         //obtenemos los Empresas con FIND que regresa un arreglo de json... un findOne te regresa un json
         const obtenerEmpresa = await EmpresaModel.find({ blnEstado: blnEstado });
+        
 
         /* //funcion con agregate
         const blnEstado2 = !blnEstado //para traernos diferentes cosas

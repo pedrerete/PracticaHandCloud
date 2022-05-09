@@ -41,7 +41,8 @@ let Schemaempresa = mongoose.Schema({
     arrObjIdUsuarios:{
         type: mongoose.Types.ObjectId,
             required: [true,'No se recibio el arrObjIdUsuarios, favor de ingresarlo'] 
-    }
+    },
+    
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('empresa',Schemaempresa);
