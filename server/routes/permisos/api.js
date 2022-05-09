@@ -95,7 +95,6 @@ try {
 //delete de API ya quedo 
 //put de API 
 
-module.exports = app;
 
 app.delete('/',verificarAcceso, async(req,res) =>{
     try{
@@ -156,3 +155,4 @@ app.delete('/',verificarAcceso, async(req,res) =>{
     
 
 })
+module.exports = app;
