@@ -31,8 +31,17 @@ let Schemaempresa = mongoose.Schema({
         required: [true,'No se recibio el nmbCodigoPostal, favor de ingresarlo'] 
     },
     strImagen:{
-        type: String
-        }
+        type: String,
+        default: 'default.jpg'
+        },
+    arrObjIdProductos:{
+        type: mongoose.Types.ObjectId,
+            required: [true,'No se recibio el arrObjIdProductos, favor de ingresarlo'] 
+    },
+    arrObjIdUsuarios:{
+        type: mongoose.Types.ObjectId,
+            required: [true,'No se recibio el arrObjIdUsuarios, favor de ingresarlo'] 
+    }
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('empresa',Schemaempresa);
