@@ -95,4 +95,64 @@ try {
 //delete de API ya quedo 
 //put de API 
 
+
+app.delete('/',verificarAcceso, async(req,res) =>{
+    try{
+        const _idApi = req.query._idApi;
+        const blnEstado = req.query.blnEstado == 'false' ? false : true;
+       
+        if(!_idApi || _idApi.length != 24)
+        {
+            console.log(blnEstado);
+            console.log(_idApi);
+            return res.status(400).json({
+                ok:false,
+                msg: _idApi ? 'El identificador no es valido' : 'No se recibio id de la api',
+                cont:{
+                    blnEstado,
+                    _idApi
+                }
+            })
+        }
+        const encontroApi = await ApiModel.findOne({_id: _idApi});
+        if(!encontroApi){
+            return res.status(400).json({
+                ok: false,
+                msg: 'La api no se encuentra registrada',
+                cont:{
+                    _idApi
+                }
+            })
+        }
+        const modificarEstadoApi = await ApiModel.findByIdAndUpdate({_id: _idApi},{$set:{blnEstado: blnEstado}},{new:true});
+        if(!modificarEstadoApi){
+            return res.status(400).json({
+                ok:false,
+                msg:blnEstado == false ? 'La api no se logro desactivar' : 'No se logro activar la api',
+                cont:{
+                    modificarEstadoApi
+                }
+            })
+        }
+        return res.status(200).json({
+            ok:true,
+            msg: blnEstado==false ? 'Se desactivo la api correctamente' : 'Se activo la api de manera exitosa',
+            cont:{
+                modificarEstadoApi
+            }
+                })
+
+    }catch(error){
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }
+    
+
+})
 module.exports = app;
