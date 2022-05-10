@@ -95,7 +95,7 @@ app.get('/usuario', verificarAcceso, async (req, res) => {
     })
 })
 
-app.get('/', async (req, res) => {
+app.get('/',verificarAcceso, async (req, res) => {
     try {
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
@@ -205,7 +205,7 @@ app.post('/', verificarAcceso, async (req, res) => {
 
 })
 
-app.put('/', async (req, res) => {
+app.put('/',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;
