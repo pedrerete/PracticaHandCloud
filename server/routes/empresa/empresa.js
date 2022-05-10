@@ -13,66 +13,26 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 
 //para usar el schema de Empresa
 //Metodo GET desde MongoDB
-app.get('/producto',verificarAcceso, async (req,res)=>{
+app.get('/producto', verificarAcceso, async (req, res) => {
 
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
-    
+
     const obtenerEmpresa = await EmpresaModel.aggregate(
-       [{
-           $match:{blnEstado:blnEstado}
-       },
-           {
-           $lookup:
-           {
-            from: 'productos',
-            let: { idEmpresa: '$_id' },
-            pipeline: [
-                { $match: { $expr: { $eq: ['$idEmpresa', '$$idEmpresa'] } } }
-            ],
-            as: 'Productos de la empresa'
-           }
-       }
-       
-       ]
-   )
-   if (obtenerEmpresa.length != 0) {
-       //Regresamos los usuarios
-       return res.status(200).json({
-           ok: true,
-           msg: 'Se obtuvieron las empresas correctamente',
-           cont: {
-               obtenerEmpresa
-           }
-       })
-   }
-   //regresamos estatus de error
-   return res.status(400).json({
-       ok: false,
-       msg: 'No se encontraron empresas',
-       cont: {
-           obtenerEmpresa
-       }
-   })
-})
-
-app.get('/usuario',verificarAcceso, async (req,res)=>{
-
-     const blnEstado = req.query.blnEstado == 'false' ? false : true;
-     
-     const obtenerEmpresa = await EmpresaModel.aggregate(
         [{
-            $match:{blnEstado:blnEstado}
+            $match: { blnEstado: blnEstado }
         },
-            {
+        {
             $lookup:
             {
-                from: "usuarios",
-                localField: "_id",
-                foreignField: "idEmpresa",
-                as: "Usuarios de la empresa:"
+                from: 'productos',
+                let: { idEmpresa: '$_id' },
+                pipeline: [
+                    { $match: { $expr: { $eq: ['$idEmpresa', '$$idEmpresa'] } } }
+                ],
+                as: 'Productos de la empresa'
             }
         }
-        
+
         ]
     )
     if (obtenerEmpresa.length != 0) {
@@ -95,13 +55,53 @@ app.get('/usuario',verificarAcceso, async (req,res)=>{
     })
 })
 
-app.get('/',verificarAcceso, async (req, res) => {
+app.get('/usuario', verificarAcceso, async (req, res) => {
+
+    const blnEstado = req.query.blnEstado == 'false' ? false : true;
+
+    const obtenerEmpresa = await EmpresaModel.aggregate(
+        [{
+            $match: { blnEstado: blnEstado }
+        },
+        {
+            $lookup:
+            {
+                from: "usuarios",
+                localField: "_id",
+                foreignField: "idEmpresa",
+                as: "Usuarios de la empresa:"
+            }
+        }
+
+        ]
+    )
+    if (obtenerEmpresa.length != 0) {
+        //Regresamos los usuarios
+        return res.status(200).json({
+            ok: true,
+            msg: 'Se obtuvieron las empresas correctamente',
+            cont: {
+                obtenerEmpresa
+            }
+        })
+    }
+    //regresamos estatus de error
+    return res.status(400).json({
+        ok: false,
+        msg: 'No se encontraron empresas',
+        cont: {
+            obtenerEmpresa
+        }
+    })
+})
+
+app.get('/', async (req, res) => {
     try {
         const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
         //obtenemos los Empresas con FIND que regresa un arreglo de json... un findOne te regresa un json
         const obtenerEmpresa = await EmpresaModel.find({ blnEstado: blnEstado });
-        
+
 
         /* //funcion con agregate
         const blnEstado2 = !blnEstado //para traernos diferentes cosas
@@ -137,11 +137,12 @@ app.get('/',verificarAcceso, async (req, res) => {
                 obtenerEmpresa
             }
         })
-    } catch (error) {const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
@@ -149,7 +150,7 @@ app.get('/',verificarAcceso, async (req, res) => {
 })
 
 //Metodo GET desde MongoDB
-app.post('/',verificarAcceso, async (req, res) => {
+app.post('/', verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
         const EmpresaBody = new EmpresaModel(body);
@@ -172,8 +173,17 @@ app.post('/',verificarAcceso, async (req, res) => {
             }
             EmpresaBody.strImagen = await subirArchivo(req.files.strImagen, 'empresas', ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
-
-
+        const obtenerEmpresas = await EmpresaModel.find();
+        for (var index = 0; index < obtenerEmpresas.length; ++index) {
+            var empresa = obtenerEmpresas[index];
+            if (empresa.strEmail == EmpresaBody.strEmail) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Se recibio un correo ya existente: ' + empresa.strEmail
+                })
+                break;
+            }
+        }
         const EmpresaRegistrado = await EmpresaBody.save();
         return res.status(200).json({
             ok: true,
@@ -182,11 +192,12 @@ app.post('/',verificarAcceso, async (req, res) => {
                 EmpresaRegistrado
             }
         })
-    } catch (error) {const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
@@ -194,7 +205,7 @@ app.post('/',verificarAcceso, async (req, res) => {
 
 })
 
-app.put('/',verificarAcceso, async (req, res) => {
+app.put('/', async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;
@@ -218,6 +229,19 @@ app.put('/',verificarAcceso, async (req, res) => {
             })
         }
         const body = req.body
+        if (body.strEmail) {
+            const obtenerEmpresas = await EmpresaModel.find();
+            for (var index = 0; index < obtenerEmpresas.length; ++index) {
+                var empresa = obtenerEmpresas[index];
+                if (empresa.strEmail == body.strEmail) {
+                    return res.status(400).json({
+                        ok: false,
+                        msg: 'Se recibio un correo ya existente: ' + empresa.strEmail
+                    })
+                    break;
+                }
+            }
+        }
         const actualizarEmpresa = await EmpresaModel.findByIdAndUpdate(_idEmpresa, body, { new: true })
         if (!actualizarEmpresa) {
             return res.status(400).json({
@@ -237,18 +261,19 @@ app.put('/',verificarAcceso, async (req, res) => {
                 EmpresaNuevo: actualizarEmpresa
             }
         })
-    } catch (error) {const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
     }
 })
 
-app.delete('/',verificarAcceso, async (req, res) => {
+app.delete('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idEmpresa = req.query._idEmpresa;
@@ -290,11 +315,12 @@ app.delete('/',verificarAcceso, async (req, res) => {
                 borrarEmpresa
             }
         })
-    } catch (error) {const err = Error(error)
+    } catch (error) {
+        const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
