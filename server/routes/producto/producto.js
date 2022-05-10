@@ -66,8 +66,8 @@ app.get('/', verificarAcceso, async (req, res) => {
     }
 })
 
-//Metodo GET desde MongoDB
-app.post('/', verificarAcceso, async (req, res) => {
+//Metodo POST desde MongoDB
+app.post('/', async (req, res) => {
     try {
         const body = req.body;
         const productoBody = new ProductoModel(body);
@@ -90,7 +90,16 @@ app.post('/', verificarAcceso, async (req, res) => {
             }
             productoBody.strImagen = await subirArchivo(req.files.strImagen, 'productos', ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
-
+        const buscarProducto = await ProductoModel.findOne({nmbSku: productoBody.nmbSku, idEmpresa: productoBody.idEmpresa});
+        if(buscarProducto){
+            return res.status(400).json({
+                ok: false,
+                msg: 'El producto ya existe en la base de datos',
+                cont:{
+                    buscarProducto
+                }
+            })
+        }
         const productoRegistrado = await productoBody.save();
         return res.status(200).json({
             ok: true,
@@ -112,7 +121,7 @@ app.post('/', verificarAcceso, async (req, res) => {
 
 })
 
-app.put('/', verificarAcceso, async (req, res) => {
+app.put('/', async (req, res) => {
     try {
         //leemos los datos enviados
         const _idProducto = req.query._idProducto;
@@ -135,7 +144,21 @@ app.put('/', verificarAcceso, async (req, res) => {
                 }
             })
         }
+        
         const body = req.body
+        if(req.body.nmbSku)
+        {
+            const buscarProducto = await ProductoModel.findOne({nmbSku: body.nmbSku, idEmpresa: body.idEmpresa});
+            if(buscarProducto){
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'El producto ya existe en la empresa',
+                    cont:{
+                        buscarProducto
+                    }
+                })
+            }
+        }
         const actualizarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, body, { new: true })
         if (!actualizarProducto) {
             return res.status(400).json({
