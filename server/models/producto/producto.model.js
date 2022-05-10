@@ -30,7 +30,11 @@ let SchemaProducto = mongoose.Schema({
     strImagen:{
         type: String,
         default: 'default.jpg'
-        }
+    },
+    idEmpresa:{
+        type: mongoose.Types.ObjectId,
+        required: [true,'No se recibio el idEmpresa, favor de ingresarlo'] 
+    }
 })
 //exporetamos el eschema con el nombre de producto
 module.exports = mongoose.model('producto',SchemaProducto);
