@@ -34,6 +34,10 @@ let SchemaProducto = mongoose.Schema({
     idEmpresa:{
         type: mongoose.Types.ObjectId,
         required: [true,'No se recibio el idEmpresa, favor de ingresarlo'] 
+    },
+    nmbSku:{
+        type: Number,
+        required: [true,'No se recibio el nmbSku, favor de ingresarlo'] 
     }
 })
 //exporetamos el eschema con el nombre de producto
