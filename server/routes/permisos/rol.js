@@ -166,7 +166,7 @@ app.put('/',verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/',  async (req, res) => {
+app.delete('/', verificarAcceso,  async (req, res) => {
     try {
         //leemos los datos enviados
         const _idRol = req.query._idRol;
