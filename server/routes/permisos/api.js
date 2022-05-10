@@ -92,8 +92,7 @@ try {
 }    
 })
 
-//delete de API ya quedo 
-//put de API 
+ 
 app.put('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados

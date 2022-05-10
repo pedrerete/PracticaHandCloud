@@ -14,7 +14,7 @@ const { verificarAcceso } = require('../../middlewares/permisos')
 //para usar el schema de Empresa
 //Metodo GET desde MongoDB
 app.get('/producto', verificarAcceso, async (req, res) => {
-
+try{
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
     const obtenerEmpresa = await EmpresaModel.aggregate(
@@ -53,10 +53,20 @@ app.get('/producto', verificarAcceso, async (req, res) => {
             obtenerEmpresa
         }
     })
+} catch (error) {
+    const err = Error(error)
+    return res.status(500).json({
+        ok: false,
+        msg: 'Error en el servidor',
+        cont: {
+            err: err.message ? err.message : err.name ? err.name : err
+        }
+    })
+}
 })
 
 app.get('/usuario', verificarAcceso, async (req, res) => {
-
+try{
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
     const obtenerEmpresa = await EmpresaModel.aggregate(
@@ -93,6 +103,16 @@ app.get('/usuario', verificarAcceso, async (req, res) => {
             obtenerEmpresa
         }
     })
+} catch (error) {
+    const err = Error(error)
+    return res.status(500).json({
+        ok: false,
+        msg: 'Error en el servidor',
+        cont: {
+            err: err.message ? err.message : err.name ? err.name : err
+        }
+    })
+}
 })
 
 app.get('/',verificarAcceso, async (req, res) => {
@@ -149,7 +169,6 @@ app.get('/',verificarAcceso, async (req, res) => {
     }
 })
 
-//Metodo GET desde MongoDB
 app.post('/', verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
