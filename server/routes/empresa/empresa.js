@@ -1,4 +1,4 @@
-//Express para el servidor
+/* Importación de los módulos. */
 const { response } = require('express');
 const express = require('express');
 const req = require('express/lib/request');
@@ -7,14 +7,10 @@ const app = express.Router();
 const { verificarAcceso } = require('../../middlewares/permisos')
 
 
-/////////////////////////////////
-//Mongoose con MongoDB en la ruta
-/////////////////////////////////
-
-//para usar el schema de Empresa
-//Metodo GET desde MongoDB
 app.get('/producto', verificarAcceso, async (req, res) => {
 try{
+/* Al verificar si el parámetro de consulta blnEstado es falso, si lo es, establece la variable
+blnEstado en falso, de lo contrario, la establece en verdadero. */
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
     const obtenerEmpresa = await EmpresaModel.aggregate(
@@ -22,6 +18,7 @@ try{
             $match: { blnEstado: blnEstado }
         },
         {
+           /* Esta es una etapa de búsqueda. Se utiliza para unir dos colecciones. */
             $lookup:
             {
                 from: 'productos',
@@ -35,8 +32,8 @@ try{
 
         ]
     )
+/* Comprobando si la matriz no está vacía. */
     if (obtenerEmpresa.length != 0) {
-        //Regresamos los usuarios
         return res.status(200).json({
             ok: true,
             msg: 'Se obtuvieron las empresas correctamente',
@@ -67,6 +64,8 @@ try{
 
 app.get('/usuario', verificarAcceso, async (req, res) => {
 try{
+/* Verificando si el parámetro de consulta blnEstado es falso, si lo es, pone la variable blnEstado en
+falso, en caso contrario, la pone en verdadero. */
     const blnEstado = req.query.blnEstado == 'false' ? false : true;
 
     const obtenerEmpresa = await EmpresaModel.aggregate(
@@ -85,6 +84,7 @@ try{
 
         ]
     )
+    /* Comprobando si la matriz no está vacía. */
     if (obtenerEmpresa.length != 0) {
         //Regresamos los usuarios
         return res.status(200).json({
@@ -122,21 +122,6 @@ app.get('/',verificarAcceso, async (req, res) => {
         //obtenemos los Empresas con FIND que regresa un arreglo de json... un findOne te regresa un json
         const obtenerEmpresa = await EmpresaModel.find({ blnEstado: blnEstado });
 
-
-        /* //funcion con agregate
-        const blnEstado2 = !blnEstado //para traernos diferentes cosas
-        const obetenerEmpresasAgregate = await EmpresaModel.aggregate([
-            {
-                $project: { strNombre: 1, strPrecio: 1, blnEstado:1 }
-            },
-            {
-                $match:{ blnEstado:blnEstado2}
-                //$match: { $expr: { $ne: ["$blnEstado",blnEstado] } } //no tentendi como funciona este
-            }
-           
-        ]);
-        //funcion con agregate */
-
         //si existen Empresas.. si hubieramos usado findOne, podria ser solo con "obtenerEmpresa ==TRUE"
         if (obtenerEmpresa.length != 0) {
             //Regresamos los Empresas
@@ -171,6 +156,7 @@ app.get('/',verificarAcceso, async (req, res) => {
 
 app.post('/', verificarAcceso, async (req, res) => {
     try {
+       /* Validación del cuerpo de la solicitud. */
         const body = req.body;
         const EmpresaBody = new EmpresaModel(body);
         const err = EmpresaBody.validateSync();
@@ -183,6 +169,8 @@ app.post('/', verificarAcceso, async (req, res) => {
                 }
             })
         }
+       /* Al verificar si la solicitud tiene un archivo, si lo tiene, verifica si el archivo es una
+       imagen, si lo es, carga la imagen. */
         if (req.files) {
             if (!req.files.strImagen) {
                 return res.status(400).json({
@@ -193,6 +181,7 @@ app.post('/', verificarAcceso, async (req, res) => {
             EmpresaBody.strImagen = await subirArchivo(req.files.strImagen, 'empresas', ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
         const obtenerEmpresas = await EmpresaModel.find();
+        /* Comprobando si el correo electrónico ya está en la base de datos. */
         for (var index = 0; index < obtenerEmpresas.length; ++index) {
             var empresa = obtenerEmpresas[index];
             if (empresa.strEmail == EmpresaBody.strEmail) {
@@ -237,6 +226,7 @@ app.put('/',verificarAcceso, async (req, res) => {
                 }
             })
         }
+        //buscamos el id de empresa
         const encontrarEmpresa = await EmpresaModel.findOne({ _id: _idEmpresa, blnEstado: true })
         if (!encontrarEmpresa) {
             return res.status(400).json({
@@ -248,6 +238,7 @@ app.put('/',verificarAcceso, async (req, res) => {
             })
         }
         const body = req.body
+        //si quiere cambiar el mail, hay que validar que no exista
         if (body.strEmail) {
             const obtenerEmpresas = await EmpresaModel.find();
             for (var index = 0; index < obtenerEmpresas.length; ++index) {
@@ -261,6 +252,7 @@ app.put('/',verificarAcceso, async (req, res) => {
                 }
             }
         }
+        //buscamos para actuaizar
         const actualizarEmpresa = await EmpresaModel.findByIdAndUpdate(_idEmpresa, body, { new: true })
         if (!actualizarEmpresa) {
             return res.status(400).json({
@@ -305,6 +297,7 @@ app.delete('/', verificarAcceso, async (req, res) => {
                 }
             })
         }
+        //buscamos una empresa
         const encontrarEmpresa = await EmpresaModel.findOne({ _id: _idEmpresa })
         if (!encontrarEmpresa) {
             return res.status(400).json({
@@ -316,6 +309,7 @@ app.delete('/', verificarAcceso, async (req, res) => {
             })
         }
         //const borrarEmpresa = await EmpresaModel.findByIdAndDelete(_idEmpresa) no se debe borrar
+        //se cambia el estado de activo a inactivo
         const borrarEmpresa = await EmpresaModel.findByIdAndUpdate(_idEmpresa, { blnEstado: false }, { new: true })
 
         if (!borrarEmpresa) {
