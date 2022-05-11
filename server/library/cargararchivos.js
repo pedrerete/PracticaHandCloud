@@ -9,14 +9,17 @@ app.use(fileUpload)
 
 const subirArchivo = async (file, route, exts) =>{
     try{
+        //si no se manda archivo
         if(!file){
             throw new Error('No se mando archivo valido')
         }
+        //si no se recibe un archivo con las extensiones adecuadas
         if(!exts.includes(file.mimetype)){
             throw new Error('Solo las extensiones: ' + exts.join(', ') + ' son aceptadas')
         }
+        //se crea el nombre de la iamgen y se guarda en el servidor
         let nameImg = uniqid()  +  path.extname(file.name)
-        await file.mv(path.resolve(__dirname,'../../uploads/' + route + '/' + nameImg )).catch(error=>{
+        await file.mv(path.resolve(__dirname,'../../uploads/'  + nameImg )).catch(error=>{
             console.log(error)
             throw new Error('No se pudo subir el archivo al servidor')
         })

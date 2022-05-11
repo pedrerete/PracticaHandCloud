@@ -165,5 +165,63 @@ app.put('/',verificarAcceso, async (req, res) => {
         })
     }
 })
-//delete de ROL ya quedo
+
+app.delete('/', verificarAcceso,  async (req, res) => {
+    try {
+        //leemos los datos enviados
+        const _idRol = req.query._idRol;
+        const blnEstado = req.query.blnEstado == 'false' ? false : true;
+
+        if (!_idRol || _idRol.length != 24) {
+            return res.status(400).json({
+                ok: false,
+                msg: _idRol ? 'El identificador no es valido' : 'No se recibio id del rol',
+                cont: {
+                    blnEstado,
+                    _idRol
+                }
+            })
+        }
+        const encontrarRol = await RolModel.findOne({ _id: _idRol })
+        if (!encontrarRol) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El Rol no se encuentra registrado',
+                cont: {
+                    _idRol
+                }
+            })
+        }
+        const modificarEstadoRol = await RolModel.findByIdAndUpdate(_idRol, {$set: {blnEstado: blnEstado }}, { new: true })
+        if (!modificarEstadoRol) {
+            return res.status(400).json({
+                ok: false,
+                msg: blnEstado == false ? 'El Rol no se pudo desactivar' : 'El Rol no se pudo activar',
+                cont: {
+                    modificarEstadoRol
+                }
+            })
+        }
+        return res.status(200).json({
+            ok: true,
+            msg: blnEstado == false ? 'Se desactivo el Rol' : 'Se activo el Rol',
+            cont: {
+                modificarEstadoRol
+            }
+        })
+
+
+
+    } catch (error) {
+        const err = Error(error)
+        return res.status(500).json({
+            ok: false,
+            msg: 'Error en el servidor',
+            cont: {
+                err: err.message ? err.message : err.name ? err.name : err
+            }
+        })
+    }
+})
+
 module.exports = app;

@@ -1,16 +1,17 @@
-const jwt = require('jsonwebtoken');
-require('../config/config');
-const UsuarioModel = require('../models/usuario/usuario.model');
-const ApiModel = require('../models/permisos/api.model');
-const RolModel = require('../models/permisos/rol.model');
-const ObjectId = require('mongoose').Types.ObjectId;
+const jwt = require('jsonwebtoken'); //token para eguridad
+require('../config/config'); //Variables globales 
+const UsuarioModel = require('../models/usuario/usuario.model'); //shema de usuario
+const ApiModel = require('../models/permisos/api.model'); //schema de api, no se usa
+const RolModel = require('../models/permisos/rol.model');//schema de rol, no se usa
+const ObjectId = require('mongoose').Types.ObjectId;//para convetir strings a objectId
 
 
 const verificarAcceso = async (req, res, next) => {
     try {
-        const url = req.originalUrl.split("?")[0]
+        const url = req.originalUrl.split("?")[0] //tomamos la parte importante de la url a la que se quiere acceder, quitando parametros
 
-        const token = req.get('token')
+        const token = req.get('token')//tomamos el token
+        //si no se mando token, se regresa un error
         if (!token) {
             return res.status(400).json({
                 ok: false,
@@ -20,13 +21,15 @@ const verificarAcceso = async (req, res, next) => {
                 }
             })
         }
+        //verificamos que el token sea correcto
         jwt.verify(token, process.env.SEED, async (err, decoded) => {
-            if (err) {
+            if (err) {//si hubo un error, regresa el error
                 return res.status(400).json({
                     ok: false,
                     msg: err.name == 'JsonWebTokenError' ? 'Error, token invalido, se nego el acceso a ' + url + ' con el metodo ' + req.method : 'Token expirado, se nego el acceso a ' + url + ' con el metodo ' + req.method
                 })
             }
+            //si no viene un usuario en el token, se manda error
             if (!decoded.usuario._id) {
                 return res.status(400).json({
                     ok: false,
@@ -36,25 +39,26 @@ const verificarAcceso = async (req, res, next) => {
                     }
                 })
             }
+            //se busca en la BD el rol y las apis de ese usuario
             const [obtenerUsuario] = await UsuarioModel.aggregate(
                 [{
-                    $match: { blnEstado: true }
+                    $match: { blnEstado: true } //que este activo
                 },
                 {
-                    $match: { _id: ObjectId(decoded.usuario._id) }
+                    $match: { _id: ObjectId(decoded.usuario._id) } //solo el usuario que se mando en el token
                 },
                 {
                     $lookup: {
                         from: 'rols',
                         let: { rolUsuario: '$_idObjRol' },
                         pipeline: [
-                            { $match: { $expr: { $eq: ['$_id', '$$rolUsuario'] } } },
+                            { $match: { $expr: { $eq: ['$_id', '$$rolUsuario'] } } }, //tomamos el rol
                             {
                                 $lookup: {
                                     from: 'apis',
                                     let: { arrObjIdApis: '$arrObjIdApis' },
                                     pipeline: [
-                                        { $match: { $expr: { $in: ['$_id', '$$arrObjIdApis'] } } }
+                                        { $match: { $expr: { $in: ['$_id', '$$arrObjIdApis'] } } } //tomamos las apis del rol
                                     ],
                                     as: 'apis'
                                 }
@@ -79,6 +83,7 @@ const verificarAcceso = async (req, res, next) => {
                 }
                 ]
             )
+            //si no encontro usuario, mandamos error
             if (!obtenerUsuario) {
                 return res.status(400).json({
                     ok: false,
@@ -89,6 +94,7 @@ const verificarAcceso = async (req, res, next) => {
                 })
 
             }
+            //si el usuario no tiene rol, mandamos error
             if (!obtenerUsuario.rol) {
                 return res.status(400).json({
                     ok: false,
@@ -100,6 +106,7 @@ const verificarAcceso = async (req, res, next) => {
 
             }
             if (obtenerUsuario.rol.apis) {
+                //si ese rol no tiene apis, regresamos el error
                 if (obtenerUsuario.rol.apis.length < 1) {
                     return res.status(400).json({
                         ok: false,
@@ -110,6 +117,7 @@ const verificarAcceso = async (req, res, next) => {
                     })
                 }
             } else {
+                //el rol esta mal porque no tiene campo de apis
                 return res.status(400).json({
                     ok: false,
                     msg: 'No existe el campo de api',
@@ -118,7 +126,9 @@ const verificarAcceso = async (req, res, next) => {
                     }
                 })
             }
+            //buscamos que la ruta y el metodo al que se quiere acceder ecista dentro de las apis del rol del usuario
             const encontroRuta = obtenerUsuario.rol.apis.find(api => api.strRuta === url & api.strMetodo === req.method)
+            //si no encontro nada, no se tiene acceso a esa api con ese metodo
             if (!encontroRuta) {
                 return res.status(400).json({
                     ok: false,
@@ -128,6 +138,7 @@ const verificarAcceso = async (req, res, next) => {
                     }
                 })
             }
+            //vamos a la api con el metodo accedido
             next();
         })
     } catch (error) {
@@ -140,4 +151,5 @@ const verificarAcceso = async (req, res, next) => {
         })
     }
 }
+//expórtamos verificarAcceso para ser usado en las rutas
 module.exports = { verificarAcceso }

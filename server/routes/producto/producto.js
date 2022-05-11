@@ -66,8 +66,8 @@ app.get('/', verificarAcceso, async (req, res) => {
     }
 })
 
-//Metodo GET desde MongoDB
-app.post('/', verificarAcceso, async (req, res) => {
+//Metodo POST desde MongoDB
+app.post('/', async (req, res) => {
     try {
         const body = req.body;
         const productoBody = new ProductoModel(body);
@@ -90,7 +90,16 @@ app.post('/', verificarAcceso, async (req, res) => {
             }
             productoBody.strImagen = await subirArchivo(req.files.strImagen, 'productos', ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
-
+        const buscarProducto = await ProductoModel.findOne({nmbSku: productoBody.nmbSku, idEmpresa: productoBody.idEmpresa});
+        if(buscarProducto){
+            return res.status(400).json({
+                ok: false,
+                msg: 'El producto ya existe en la base de datos',
+                cont:{
+                    buscarProducto
+                }
+            })
+        }
         const productoRegistrado = await productoBody.save();
         return res.status(200).json({
             ok: true,
@@ -112,7 +121,7 @@ app.post('/', verificarAcceso, async (req, res) => {
 
 })
 
-app.put('/', verificarAcceso, async (req, res) => {
+app.put('/', async (req, res) => {
     try {
         //leemos los datos enviados
         const _idProducto = req.query._idProducto;
@@ -135,7 +144,21 @@ app.put('/', verificarAcceso, async (req, res) => {
                 }
             })
         }
+        
         const body = req.body
+        if(req.body.nmbSku)
+        {
+            const buscarProducto = await ProductoModel.findOne({nmbSku: body.nmbSku, idEmpresa: body.idEmpresa});
+            if(buscarProducto){
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'El producto ya existe en la empresa',
+                    cont:{
+                        buscarProducto
+                    }
+                })
+            }
+        }
         const actualizarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, body, { new: true })
         if (!actualizarProducto) {
             return res.status(400).json({
@@ -167,49 +190,53 @@ app.put('/', verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/', verificarAcceso, async (req, res) => {
-    try {
-        //leemos los datos enviados
+app.delete('/',verificarAcceso, async(req,res) =>{
+    try{
         const _idProducto = req.query._idProducto;
-        if (!_idProducto || _idProducto.length != 24) {
+        const blnEstado = req.query.blnEstado == 'false' ? false : true;
+       
+        if(!_idProducto || _idProducto.length != 24)
+        {
+            console.log(blnEstado);
+            console.log(_idProducto);
             return res.status(400).json({
-                ok: false,
-                msg: _idProducto ? 'El identificador no es valido' : 'No se recibio id de producto',
-                cont: {
+                ok:false,
+                msg: _idProducto ? 'El identificador no es valido' : 'No se recibio id del producto',
+                cont:{
+                    blnEstado,
                     _idProducto
                 }
             })
         }
-        const encontrarProducto = await ProductoModel.findOne({ _id: _idProducto })
-        if (!encontrarProducto) {
+        const encontroProducto = await ProductoModel.findOne({_id: _idProducto});
+        if(!encontroProducto){
             return res.status(400).json({
                 ok: false,
-                msg: 'El producto no se encuentra registrado',
-                cont: {
+                msg: 'El producto no se encuentra registrada',
+                cont:{
                     _idProducto
                 }
             })
         }
-        //const borrarProducto = await ProductoModel.findByIdAndDelete(_idProducto) no se debe borrar
-        const borrarProducto = await ProductoModel.findByIdAndUpdate(_idProducto, { blnEstado: false }, { new: true })
-
-        if (!borrarProducto) {
+        const modificarEstadoProducto = await ProductoModel.findByIdAndUpdate({_id: _idProducto},{$set:{blnEstado: blnEstado}},{new:true});
+        if(!modificarEstadoProducto){
             return res.status(400).json({
-                ok: false,
-                msg: 'El producto no se logro desactivar',
-                cont: {
-                    borrarProducto
+                ok:false,
+                msg:blnEstado == false ? 'El producto no se logro desactivar' : 'No se logro activar el producto',
+                cont:{
+                    modificarEstadoProducto
                 }
             })
         }
         return res.status(200).json({
-            ok: true,
-            msg: 'Se desactivo el producto',
-            cont: {
-                borrarProducto
+            ok:true,
+            msg: blnEstado==false ? 'Se desactivo el producto correctamente' : 'Se activo el producto de manera exitosa',
+            cont:{
+                modificarEstadoProducto
             }
-        })
-    } catch (error) {
+                })
+
+    }catch(error){
         const err = Error(error)
         return res.status(500).json({
             ok: false,
