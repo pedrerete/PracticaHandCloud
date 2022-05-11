@@ -4,7 +4,8 @@ const express = require('express');
 const req = require('express/lib/request');
 const EmpresaModel = require('../../models/empresa/empresa.model');
 const app = express.Router();
-const { verificarAcceso } = require('../../middlewares/permisos')
+const { verificarAcceso } = require('../../middlewares/permisos');
+const empresaModel = require('../../models/empresa/empresa.model');
 
 
 app.get('/producto', verificarAcceso, async (req, res) => {
@@ -284,51 +285,53 @@ app.put('/',verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/', verificarAcceso, async (req, res) => {
-    try {
-        //leemos los datos enviados
+app.delete('/',verificarAcceso, async(req,res) =>{
+    try{
         const _idEmpresa = req.query._idEmpresa;
-        if (!_idEmpresa || _idEmpresa.length != 24) {
+        const blnEstado = req.query.blnEstado == 'false' ? false : true;
+       
+        if(!_idEmpresa || _idEmpresa.length != 24)
+        {
+            console.log(blnEstado);
+            console.log(_idEmpresa);
             return res.status(400).json({
-                ok: false,
-                msg: _idEmpresa ? 'El identificador no es valido' : 'No se recibio id de Empresa',
-                cont: {
+                ok:false,
+                msg: _idEmpresa ? 'El identificador no es valido' : 'No se recibio id de la empresa',
+                cont:{
+                    blnEstado,
                     _idEmpresa
                 }
             })
         }
-        //buscamos una empresa
-        const encontrarEmpresa = await EmpresaModel.findOne({ _id: _idEmpresa })
-        if (!encontrarEmpresa) {
+        const encontroEmpresa = await EmpresaModel.findOne({_id: _idEmpresa});
+        if(!encontroEmpresa){
             return res.status(400).json({
                 ok: false,
-                msg: 'El Empresa no se encuentra registrado',
-                cont: {
+                msg: 'La empresa no se encuentra registrada',
+                cont:{
                     _idEmpresa
                 }
             })
         }
-        //const borrarEmpresa = await EmpresaModel.findByIdAndDelete(_idEmpresa) no se debe borrar
-        //se cambia el estado de activo a inactivo
-        const borrarEmpresa = await EmpresaModel.findByIdAndUpdate(_idEmpresa, { blnEstado: false }, { new: true })
-
-        if (!borrarEmpresa) {
+        const modificarEstadoEmpresa = await empresaModel.findByIdAndUpdate({_id: _idEmpresa},{$set:{blnEstado: blnEstado}},{new:true});
+        if(!modificarEstadoEmpresa){
             return res.status(400).json({
-                ok: false,
-                msg: 'El Empresa no se logro desactivar',
-                cont: {
-                    borrarEmpresa
+                ok:false,
+                msg:blnEstado == false ? 'La empresa no se logro desactivar' : 'No se logro activar la empresa',
+                cont:{
+                    modificarEstadoEmpresa
                 }
             })
         }
         return res.status(200).json({
-            ok: true,
-            msg: 'Se desactivo el Empresa',
-            cont: {
-                borrarEmpresa
+            ok:true,
+            msg: blnEstado==false ? 'Se desactivo la empresa correctamente' : 'Se activo la empresa de manera exitosa',
+            cont:{
+                modificarEstadoEmpresa
             }
-        })
-    } catch (error) {
+                })
+
+    }catch(error){
         const err = Error(error)
         return res.status(500).json({
             ok: false,
@@ -339,6 +342,5 @@ app.delete('/', verificarAcceso, async (req, res) => {
         })
     }
 })
-
 //Para poder usar Express
 module.exports = app;

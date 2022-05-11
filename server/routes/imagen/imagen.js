@@ -6,11 +6,10 @@ const app = express.Router();
 const { verificarAcceso } = require('../../middlewares/permisos')
 const imagenModel = require('../../models/imagen/imagen.model');
 
-app.get('/:ruta/:nameImg',verificarAcceso, async (req, res) => {
+app.get('/visual/:nameImg',verificarAcceso, async (req, res) => {
     try {
-        const ruta = req.params.ruta
         const nameImg = req.params.nameImg;
-        const rutaImagen = path.resolve(__dirname,'../../../uploads/'+ruta+'/'+nameImg)
+        const rutaImagen = path.resolve(__dirname,'../../../uploads/'+nameImg)
         const noimage = path.resolve(__dirname,'../../assets/default.png')
         if(fs.existsSync(rutaImagen)){
             return res.sendFile(rutaImagen)
@@ -56,7 +55,7 @@ app.put('/', verificarAcceso, async (req, res) => {
         const body = req.body
         if (req.files) {
             if (req.files.strImagen) {
-                body.strImagen = await subirArchivo(req.files.strImagen, body.strRuta, ['image/pgn', 'image/jpg', 'image/jpeg'])
+                body.strImagen = await subirArchivo(req.files.strImagen, "", ['image/pgn', 'image/jpg', 'image/jpeg'])
             }
         }
 
