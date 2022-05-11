@@ -1,16 +1,14 @@
+/* Importación de los módulos. */
 const { response } = require('express');
 const express = require('express');
 const app = express.Router();
 const bcrypt = require('bcrypt')
 const { verificarAcceso } = require('../../middlewares/permisos')
 
-/////////////////////////////////
-//Mongoose con MongoDB en la ruta
-/////////////////////////////////
 
-//para usar el schema de api
+/* Importación del modelo. */
 const ApiModel = require('../../models/permisos/api.model');
-//Metodo GET desde MongoDB
+
 app.get('/',verificarAcceso,  async (req, res) => {
    try {
         //obtenemos las apis con FIND
