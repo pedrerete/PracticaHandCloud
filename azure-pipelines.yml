@@ -18,4 +18,5 @@ steps:
 - script: | 
    npm install   
    npm build
+   npm start
   displayName: 'npm install and build'
