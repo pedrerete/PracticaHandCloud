@@ -67,7 +67,7 @@ app.get('/', verificarAcceso, async (req, res) => {
 })
 
 //Metodo POST desde MongoDB
-app.post('/', async (req, res) => {
+app.post('/',verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
         const productoBody = new ProductoModel(body);
@@ -121,7 +121,7 @@ app.post('/', async (req, res) => {
 
 })
 
-app.put('/', async (req, res) => {
+app.put('/',verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idProducto = req.query._idProducto;
