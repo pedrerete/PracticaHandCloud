@@ -134,7 +134,7 @@ app.post('/', async (req, res) => {
                     msg: 'No se recibio archivo de imagen'
                 })
             }
-            usuarioBody.strImagen = await subirArchivo(req.files.strImagen, 'usuarios', ['image/pgn', 'image/jpg', 'image/jpeg'])
+            usuarioBody.strImagen = await subirArchivo(req.files.strImagen, ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
         const usuarioRegistrado = await usuarioBody.save();
         /* Una solución alternativa para ocultar la contraseña de la respuesta. */

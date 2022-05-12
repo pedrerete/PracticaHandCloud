@@ -17,9 +17,8 @@ let SchemaImagen = mongoose.Schema({
         type: String
     },
     //nombre, tipo, si es requerido o no y el mensaje si es requerido y no se manda
-    strRuta:{
-        type: String,
-        required: [true,'No se recibio el strRuta, favor de ingresarlo'] 
+    strImagen:{
+        type: String
     }
 })
 

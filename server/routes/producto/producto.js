@@ -5,6 +5,7 @@ const req = require('express/lib/request');
 const ProductoModel = require('../../models/producto/producto.model');
 const app = express.Router();
 const { verificarAcceso } = require('../../middlewares/permisos')
+const { subirArchivo } = require('../../library/cargararchivos')
 
 
 /////////////////////////////////
@@ -88,7 +89,7 @@ app.post('/',verificarAcceso, async (req, res) => {
                     msg: 'No se recibio archivo de imagen'
                 })
             }
-            productoBody.strImagen = await subirArchivo(req.files.strImagen, 'productos', ['image/pgn', 'image/jpg', 'image/jpeg'])
+            productoBody.strImagen = await subirArchivo(req.files.strImagen, ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
         const buscarProducto = await ProductoModel.findOne({nmbSku: productoBody.nmbSku, idEmpresa: productoBody.idEmpresa});
         if(buscarProducto){

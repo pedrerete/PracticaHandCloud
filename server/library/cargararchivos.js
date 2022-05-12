@@ -7,7 +7,7 @@ const path = require('path')
 const res = require('express/lib/response')
 app.use(fileUpload)
 
-const subirArchivo = async (file, route, exts) =>{
+const subirArchivo = async (file, exts) =>{
     try{
         //si no se manda archivo
         if(!file){
