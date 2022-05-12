@@ -33,7 +33,7 @@ const subirArchivo = async (file, route, exts) =>{
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
-    
+
     }   
 }
 module.exports = {subirArchivo}
