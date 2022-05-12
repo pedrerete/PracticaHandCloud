@@ -3,6 +3,7 @@ const express = require('express');
 const app = express.Router();
 const bcrypt = require('bcrypt')
 const { verificarAcceso } = require('../../middlewares/permisos')
+const ObjectId = require('mongoose').Types.ObjectId;//para convetir strings a objectId
 
 /////////////////////////////////
 //Mongoose con MongoDB en la ruta
@@ -135,8 +136,12 @@ app.put('/',verificarAcceso, async (req, res) => {
             })
         }
         const body = req.body
-        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body, { new: true })//push
-        if (!actualizarRol) {
+        const bodyApis = body.arrObjIdApis //saco el arreglo de apis
+        delete body.arrObjIdApis //lo elimino del body para que no me lo planche
+        
+        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body,{ new: true })//update normal
+        const actualizarRol2 = await rolModel.findByIdAndUpdate(_idRol, {$push :{arrObjIdApis: bodyApis}},{ new: true })//update tipo push solo del arreglo de apis
+        if (!actualizarRol2 && !actualizarRol) {
             return res.status(400).json({
                 ok: true,
                 msg: 'El rol no se logro actualizar',
@@ -145,13 +150,12 @@ app.put('/',verificarAcceso, async (req, res) => {
                 }
             })
         }
-
         return res.status(200).json({
             ok: true,
             msg: 'Se actualizo el rol',
             cont: {
                 rolAnterior: encontrarRol,
-                rolNuevo: actualizarRol
+                rolNuevo: actualizarRol2
             }
         })
     } catch (error) {

@@ -6,6 +6,7 @@ const EmpresaModel = require('../../models/empresa/empresa.model');
 const app = express.Router();
 const { verificarAcceso } = require('../../middlewares/permisos');
 const empresaModel = require('../../models/empresa/empresa.model');
+const { subirArchivo } = require('../../library/cargararchivos')
 
 
 app.get('/producto', verificarAcceso, async (req, res) => {
@@ -179,7 +180,7 @@ app.post('/', verificarAcceso, async (req, res) => {
                     msg: 'No se recibio archivo de imagen'
                 })
             }
-            EmpresaBody.strImagen = await subirArchivo(req.files.strImagen, 'empresas', ['image/pgn', 'image/jpg', 'image/jpeg'])
+            EmpresaBody.strImagen = await subirArchivo(req.files.strImagen, ['image/pgn', 'image/jpg', 'image/jpeg'])
         }
         const obtenerEmpresas = await EmpresaModel.find();
         /* Comprobando si el correo electrónico ya está en la base de datos. */
