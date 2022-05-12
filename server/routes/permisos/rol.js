@@ -135,7 +135,7 @@ app.put('/',verificarAcceso, async (req, res) => {
             })
         }
         const body = req.body
-        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body, { new: true })
+        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body, { new: true })//push
         if (!actualizarRol) {
             return res.status(400).json({
                 ok: true,
