@@ -23,6 +23,7 @@ app.use((req, res, next) => {
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
     next();
 });
+app.use('/',require('./routes/inicio'))
 /* Diciéndole al servidor que use las rutas en el archivo index.js en la carpeta de rutas. */
 app.use('/api', require('./routes/index'))
 

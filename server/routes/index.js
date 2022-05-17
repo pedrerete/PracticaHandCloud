@@ -12,6 +12,5 @@ app.use('/permisosapi',require('./permisos/api'))
 app.use('/imagen',require('./imagen/imagen'))
 
 
-
 /* Exportando el objeto `app`. */
 module.exports = app;
