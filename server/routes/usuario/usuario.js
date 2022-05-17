@@ -1,15 +1,12 @@
-//Express para el servidor
+/* Importación de los módulos. */
 const { response } = require('express');
 const express = require('express');
 const app = express.Router();
 const bcrypt = require('bcrypt')
 const { verificarAcceso } = require('../../middlewares/permisos')
 const { subirArchivo } = require('../../library/cargararchivos')
-/////////////////////////////////
-//Mongoose con MongoDB en la ruta
-/////////////////////////////////
 
-//para usar el schema de usuario
+/* Importación de los modelos. */
 const UsuarioModel = require('../../models/usuario/usuario.model');
 const RolModel = require('../../models/permisos/rol.model');
 
@@ -22,9 +19,9 @@ app.get('/', verificarAcceso, async (req, res) => {
         /* Haciendo una búsqueda de la colección UsuarioModel a la colección Empresas. */
         const obtenerUsuario = await UsuarioModel.aggregate(
             [{
-                $match:{blnEstado:blnEstado}
+                $match: { blnEstado: blnEstado }
             },
-                {
+            {
                 $lookup:
                 {
                     from: "empresas",
@@ -90,7 +87,9 @@ app.get('/', verificarAcceso, async (req, res) => {
 app.post('/', async (req, res) => {
     try {
 
-        //instruccion ternaria: condicion? verdadero : falso
+        /* Crear un nuevo objeto con las mismas propiedades que req.body, pero con la propiedad
+        strContrasena establecida en el valor de req.body.strContrasena si existe, o indefinido si
+        no existe. */
         const body = { ...req.body, strContrasena: req.body.strContrasena ? bcrypt.hashSync(req.body.strContrasena, 10) : undefined };
         const usuarioBody = new UsuarioModel(body);
         const err = usuarioBody.validateSync();
@@ -103,6 +102,8 @@ app.post('/', async (req, res) => {
                 }
             })
         }
+        /* Al verificar si _idObjRol no está presente en el cuerpo de la solicitud, encontrará el rol
+        predeterminado y se lo asignará al usuario. */
         if (!req.body._idObjRol) {
             const encontroRolDefault = await RolModel.findOne({ blnRolDefault: true })
             usuarioBody._idObjRol = encontroRolDefault._id
@@ -127,6 +128,8 @@ app.post('/', async (req, res) => {
                 break;
             }
         }
+        /* Comprobando si hay un archivo en la solicitud, y si lo hay, está comprobando si el archivo
+        es una imagen. Si es así, está guardando la imagen en la base de datos. */
         if (req.files) {
             if (!req.files.strImagen) {
                 return res.status(400).json({
@@ -146,7 +149,8 @@ app.post('/', async (req, res) => {
                 usuarioRegistrado
             }
         })
-    } catch (error) {
+    } /* Detectar un error y devolver una respuesta. */
+    catch (error) {
         const err = Error(error)
         return res.status(500).json({
             ok: false,

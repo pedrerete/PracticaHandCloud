@@ -14,46 +14,46 @@ const RolModel = require('../../models/permisos/rol.model');
 const rolModel = require('../../models/permisos/rol.model');
 //Metodo GET desde MongoDB
 
-app.get('/',verificarAcceso, async (req, res) => {
+app.get('/', verificarAcceso, async (req, res) => {
     try {
         /* Haciendo una búsqueda de la colección Rol a la colección Apis. */
-    const obtApiRol2 = await RolModel.aggregate([
-        {
-            $lookup:{
-                from: 'apis',
-                let: {arrObjIdApis: '$arrObjIdApis'},
-                pipeline:[
-                   {$match: {$expr:{$in:['$_id','$$arrObjIdApis']}}}
-                ],
-                as: 'apis'
+        const obtApiRol2 = await RolModel.aggregate([
+            {
+                $lookup: {
+                    from: 'apis',
+                    let: { arrObjIdApis: '$arrObjIdApis' },
+                    pipeline: [
+                        { $match: { $expr: { $in: ['$_id', '$$arrObjIdApis'] } } }
+                    ],
+                    as: 'apis'
+                }
             }
+        ])
+        //si existen roles
+        if (obtApiRol2.length != 0) {
+            //Regresamos los roles
+            return res.status(200).json({
+                ok: true,
+                msg: 'Se obtuvieron los roles correctamente',
+                cont: {
+                    obtApiRol2
+                }
+            })
         }
-    ])
-    //si existen roles
-    if (obtApiRol2.length != 0) {
-        //Regresamos los roles
-        return res.status(200).json({
-            ok: true,
-            msg: 'Se obtuvieron los roles correctamente',
+        //regresamos estatus de error
+        return res.status(400).json({
+            ok: false,
+            msg: 'No se encontraron roles',
             cont: {
                 obtApiRol2
             }
         })
-    }
-    //regresamos estatus de error
-    return res.status(400).json({
-        ok: false,
-        msg: 'No se encontraron roles',
-        cont: {
-            obtApiRol2
-        }
-    })
     } catch (error) {
         const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
@@ -62,57 +62,57 @@ app.get('/',verificarAcceso, async (req, res) => {
 app.post('/', verificarAcceso, async (req, res) => {
     try {
         const body = req.body;
-    const bodyRol = new RolModel(body);
-    const err = bodyRol.validateSync();
-    if (err) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'uno o mas campos no se registraron, favor de ingresarlos',
-            cont: {
-                err
-            }
-        })
-    }
-    if (!body.arrObjIdApis) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'uno o mas campos no se registraron, favor de ingresarlos',
-            cont: {
-                arrObjIdApis: null
-            }
-        })
-    }
-    const enncontroRol = await RolModel.findOne({ strNombre: bodyRol.strNombre }, { strNombre: 1 })
-    if (enncontroRol) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'El rol ya se encuentra registrado',
-            cont: {
-                enncontroRol
-            }
-        })
-    }
-    const registroRol = await bodyRol.save();
-    return res.status(200).json({
-        ok: true,
-        msg: 'El rol se registro de manera exitosa',
-        cont: {
-            registroRol
+        const bodyRol = new RolModel(body);
+        const err = bodyRol.validateSync();
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'uno o mas campos no se registraron, favor de ingresarlos',
+                cont: {
+                    err
+                }
+            })
         }
-    })
+        if (!body.arrObjIdApis) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'uno o mas campos no se registraron, favor de ingresarlos',
+                cont: {
+                    arrObjIdApis: null
+                }
+            })
+        }
+        const enncontroRol = await RolModel.findOne({ strNombre: bodyRol.strNombre }, { strNombre: 1 })
+        if (enncontroRol) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El rol ya se encuentra registrado',
+                cont: {
+                    enncontroRol
+                }
+            })
+        }
+        const registroRol = await bodyRol.save();
+        return res.status(200).json({
+            ok: true,
+            msg: 'El rol se registro de manera exitosa',
+            cont: {
+                registroRol
+            }
+        })
     } catch (error) {
         const err = Error(error)
         return res.status(500).json({
             ok: false,
             msg: 'Error en el servidor',
-            cont:{
+            cont: {
                 err: err.message ? err.message : err.name ? err.name : err
             }
         })
-    } 
+    }
 })
 
-app.put('/',verificarAcceso, async (req, res) => {
+app.put('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idRol = req.query._idRol;
@@ -125,6 +125,9 @@ app.put('/',verificarAcceso, async (req, res) => {
                 }
             })
         }
+
+        /* Buscando un documento en la colección `Rol` con el `_id` igual a `_idRol` y el `blnEstado`
+        igual a `true`. */
         const encontrarRol = await RolModel.findOne({ _id: _idRol, blnEstado: true })
         if (!encontrarRol) {
             return res.status(400).json({
@@ -138,9 +141,9 @@ app.put('/',verificarAcceso, async (req, res) => {
         const body = req.body
         const bodyApis = body.arrObjIdApis //saco el arreglo de apis
         delete body.arrObjIdApis //lo elimino del body para que no me lo planche
-        
-        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body,{ new: true })//update normal
-        const actualizarRol2 = await rolModel.findByIdAndUpdate(_idRol, {$push :{arrObjIdApis: bodyApis}},{ new: true })//update tipo push solo del arreglo de apis
+
+        const actualizarRol = await rolModel.findByIdAndUpdate(_idRol, body, { new: true })//update normal
+        const actualizarRol2 = await rolModel.findByIdAndUpdate(_idRol, { $push: { arrObjIdApis: bodyApis } }, { new: true })//update tipo push solo del arreglo de apis
         if (!actualizarRol2 && !actualizarRol) {
             return res.status(400).json({
                 ok: true,
@@ -170,7 +173,7 @@ app.put('/',verificarAcceso, async (req, res) => {
     }
 })
 
-app.delete('/', verificarAcceso,  async (req, res) => {
+app.delete('/', verificarAcceso, async (req, res) => {
     try {
         //leemos los datos enviados
         const _idRol = req.query._idRol;
@@ -196,7 +199,7 @@ app.delete('/', verificarAcceso,  async (req, res) => {
                 }
             })
         }
-        const modificarEstadoRol = await RolModel.findByIdAndUpdate(_idRol, {$set: {blnEstado: blnEstado }}, { new: true })
+        const modificarEstadoRol = await RolModel.findByIdAndUpdate(_idRol, { $set: { blnEstado: blnEstado } }, { new: true })
         if (!modificarEstadoRol) {
             return res.status(400).json({
                 ok: false,
